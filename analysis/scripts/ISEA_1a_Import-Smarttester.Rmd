@@ -1,0 +1,142 @@
+---
+title: "Import dataset from Smarttester's sensor for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_1a_Import-Smarttester.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+# Goal of the script
+This script imports and merges all single TXT-files (strokes + sensors) produced with the Inotec Smarttester during the experiments. The experiment involved 12 samples (2 types of flint and 2 types of bamboo, with 3 samples in each group) used for 2000 strokes.  
+The script will:
+
+1. Read in the original TXT-files   
+2. Format and merge the data for each sample 
+3. Combines the data from the 12 samples into one file  
+4. Write an ODS file and save an R object ready for further analysis in R 
+
+For each sample, each TXT file represents 10 back-and-fourth movements (= 20 strokes) for a given sensor. After 20 strokes, the bamboo worked piece was rotated.  
+There were 5 positions (angles) for the bamboo: 0, -7.5, -15, +7.5 and +15°.  
+There were 5 sensors: depth sensor (`Depth`), position (`Position`) and velocity (`Velocity`) along the X (movement) axis, and angle (`Angle`) and torque (`Torque`) of the rotary drive for the bamboo. Readings from each sensor are saved in a separate folder. It is possible to save up to 6 sensors' readings, so the folders are numbered from 1 to 6 (or multiples thereof, see below), even though we used only 5.  
+
+In order to smooth the saving and storing of the files, the sensors' data were exported (written) after 20 strokes (hence each TXT file represents 20 strokes). However, the readings for each angle were saved in different folders, adding to the complexity of the folder structure.
+
+There are 20 files per folder, where each file recorded 20 strokes, meaning that a total of 400 strokes were performed at each angle. With 5 angles, a total 2000 strokes was recorded per sample.  
+
+With 20 files per folder and a folder for each combination of angle (5), sensor (5) and sample (12), a total of `r 20*5*5*12` TXT files were saved.
+
+Therefore, for each sample:
+
+```{r, echo = FALSE, results = 'asis'}
+# Create a sequence from 1 to 30 and omit every 6th entry, to mirror the numbering of the sensors by angle (1:5, 7:11...)
+meas_index <- seq_len(30)[-seq(from = 6, to = 30, by = 6)]
+
+# Split the sequence in groups of 5 to group the 5 sensor for each angle
+angles <- split(meas_index, sort(meas_index %% 5))
+
+# Name the list with the angles
+names(angles) <- c("0°", "-7.5°", "-15°", "+7.5°", "+15°")
+
+# Display the names of folders corresponding to each angle
+for (i in 1:5) { 
+  cat("- The folders '", paste0("Messung", angles[[i]][1], "..."), "' to '", paste0("Messung", angles[[i]][5], "..."), "' represent the readings for each of the 5 sensors,\n respectively, for Angle = ", names(angles)[i], "\n", sep = "")
+}
+```
+
+In each folder, the files "SmartDatafiles00000000.txt" to "SmartDatafiles00000019.txt" did not record contiguous strokes but rather the strokes for a given sample and sensor at a given angle.  
+For example:  
+
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000001.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 101-120  
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000019.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 1901-1920  
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung2Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Position` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung7Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Depth` at angle = -7.5° for sample ISEA-EX1 for the strokes 21-40 
+
+```{r}
+dir_in <- "analysis/raw_data/Smarttester"
+dir_out <- "analysis/derived_data/"
+```
+
+
+Raw data must be located in "`r dir_in`".  
+Formatted data will be saved in "`r dir_out`".
+
+The knit directory for this script is the project directory.
+
+---
+
+
+# Load packages
+```{r}
+library(grateful)
+library(knitr)
+library(R.utils)
+library(readODS)
+library(rmarkdown)
+library(tidyverse)
+#library(openxlsx)
+#library(tools)
+```
+
+
+---
+
+
+# List all files and get names of the files  
+```{r}
+# List all TXT files in dir_in
+TXT_files <- list.files(dir_in, pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
+
+# Extract sample names from paths
+samples_names <- dirname(dirname(TXT_files)) %>% # Path of folder 2 levels higher
+                 basename() %>%                  # Name of folder 2 levels higher
+                 unique()                        # Unique names
+```
+
+`r length(TXT_files)` TXT files were found.
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_1a_Import-Smarttester")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
+
