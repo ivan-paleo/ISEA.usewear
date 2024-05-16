@@ -73,12 +73,12 @@ For example:
 - in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung7Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Depth` at angle = -7.5° for sample ISEA-EX1 for the strokes 21-40 
 
 ```{r}
-dir_in <- "analysis/raw_data/Smarttester"
+dir_in <- "D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data"
 dir_out <- "analysis/derived_data/"
 ```
 
 
-Raw data must be located in "`r dir_in`".  
+Due to the huge number of TXT files (`r 20*5*5*12`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`".  
 Formatted data will be saved in "`r dir_out`".
 
 The knit directory for this script is the project directory.
@@ -107,13 +107,51 @@ library(tidyverse)
 # List all TXT files in dir_in
 TXT_files <- list.files(dir_in, pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
 
-# Extract sample names from paths
-samples_names <- dirname(dirname(TXT_files)) %>% # Path of folder 2 levels higher
-                 basename() %>%                  # Name of folder 2 levels higher
-                 unique()                        # Unique names
+# Extract sample IDs from paths
+samples_ID <- dirname(dirname(TXT_files)) %>% # Path of folder 2 levels higher
+              basename() %>%                  # Name of folder 2 levels higher
+              unique()                        # Unique names
+
+# Extract folder name from paths
+messung <- dirname(TXT_files) %>% # Path of folder 1 level higher
+           basename()             # Name of folder 1 level higher
+
+# Extract file name from paths
+filen <- basename(TXT_files)
 ```
 
 `r length(TXT_files)` TXT files were found.
+
+---
+
+
+# Read in sensors' data
+```{r}
+# prepare for loop - To DELETE LATER
+i <- 1
+
+# Extract sensor's name and unit from the TXT file
+                    # Info on Line 3
+sensor_name_unit <- read.table(TXT_files[i], skip = 2, nrows = 1, sep = ";", fileEncoding = 'WINDOWS-1252') %>% 
+                    
+                    # Convert to vector
+                    unlist()  %>% 
+  
+                    # Split name and unit
+                    strsplit(" in ")  %>% 
+  
+                    # Convert to vector to be used in comment() below
+                    unlist()
+
+# Rename vector
+names(sensor_name_unit) <- c("Sensor", "Unit")
+
+# Read in data
+dataTXT <- read.table(TXT_files[i], skip = 4, sep = ";")
+names(dataTXT) <- c(sensor_name_unit[["Sensor"]], "Step")
+comment(dataTXT) <- c(sensor_name_unit, samples_ID[i], messung[i], filen[i])
+```
+
 
 ---
 
