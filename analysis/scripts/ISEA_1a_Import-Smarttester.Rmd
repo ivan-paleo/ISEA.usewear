@@ -78,7 +78,8 @@ dir_out <- "analysis/derived_data/"
 ```
 
 
-Due to the huge number of TXT files (`r 20*5*5*12`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`".  
+Due to the huge number of TXT files (`r 20*5*5*12`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`" for running the script. They can be accessed on Zenodo: 
+
 Formatted data will be saved in "`r dir_out`".
 
 The knit directory for this script is the project directory.
@@ -104,52 +105,69 @@ library(tidyverse)
 
 # List all files and get names of the files  
 ```{r}
-# List all TXT files in dir_in
-TXT_files <- list.files(dir_in, pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
-
-# Extract sample IDs from paths
-samples_ID <- dirname(dirname(TXT_files)) %>% # Path of folder 2 levels higher
-              basename() %>%                  # Name of folder 2 levels higher
-              unique()                        # Unique names
-
-# Extract folder name from paths
-messung <- dirname(TXT_files) %>% # Path of folder 1 level higher
-           basename()             # Name of folder 1 level higher
-
-# Extract file name from paths
-filen <- basename(TXT_files)
-```
-
-`r length(TXT_files)` TXT files were found.
-
----
+# Create dataframe containing identification of folders
+#folders <- data.frame(bamboo = c(0, -7.5, -15, 7.5, 15), Weg = seq(1, 30, 6), Stroke = seq(2, 30, 6), Velocity = seq(3, 30, 6), 
+#                      Angle = seq(4, 30, 6), Torque = seq(5, 30, 6))
+folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5), 
+                      folder = seq_len(30)[-seq(from = 6, to = 30, by = 6)])
 
 
-# Read in sensors' data
-```{r}
-# prepare for loop - To DELETE LATER
-i <- 1
+# Extract sample IDs from folder names
+Samples_ID <- dir(dir_in)
 
-# Extract sensor's name and unit from the TXT file
-                    # Info on Line 3
-sensor_name_unit <- read.table(TXT_files[i], skip = 2, nrows = 1, sep = ";", fileEncoding = 'WINDOWS-1252') %>% 
+# Exclude EX3 for now = TO ADJUST LATER
+Samples_ID <- Samples_ID[Samples_ID != "ISEA-EX3"]
+
+# Create list, 1 element for each sample
+Samples_data <- vector(mode = "list", length = length(Samples_ID)) 
+
+# For each sample
+for (i in seq_along(Samples_ID)) {
+  
+  # List all TXT files in dir_in/Samples_ID
+  TXT_files <- list.files(paste(dir_in, Samples_ID[i], sep = "/"), 
+                          pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
+  # Display number of TXT files
+  cat(length(TXT_files), "TXT files were found for sample", Samples_ID[i], "\n")
+  
+  # Import all TXT files 
+  # Create list, 1 element for each TXT file
+  TXT_data <- vector(mode = "list", length = length(TXT_files))
+
+  # For each file
+  for (j in seq_along(TXT_files)) {
+    
+  # Extract sensor's name and unit from the TXT file
+                      # Info on Line 3
+  name_unit <- unlist(read.table(TXT_files[j], skip = 2, nrows = 1, sep = ";", fileEncoding = 'WINDOWS-1252')) %>% 
                     
-                    # Convert to vector
-                    unlist()  %>% 
+               # Format name and unit
+               gsub("in ", "[", .)  %>% 
+               paste0(., "]") %>%
+               gsub("E2: ", "", .)
   
-                    # Split name and unit
-                    strsplit(" in ")  %>% 
+  # Extract folder and file names from path
+  messung <- as.numeric(gsub("Messung|Date[0-9]*", "", basename(dirname(TXT_files[j]))))
+  smartfile <- as.numeric(gsub("SmartDatafiles000000|.txt", "", basename(TXT_files[j])))
+  #bamboo <- unique(folders[folders$folder == messung, "bamboo"])
   
-                    # Convert to vector to be used in comment() below
-                    unlist()
+  # Read in and format data
+  TXT_data[[j]] <- read.table(TXT_files[j], skip = 4, sep = ";") %>%
+                   #mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Bamboo_position = bamboo) %>%
+                   mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Sensor_name = name_unit) %>%
+                   rename(Sensor_value = "V1", Step = "V2")
+  }
+  
+  # rbind all files per sample
+  Samples_data[[i]] <- do.call(rbind, TXT_data)
+  str(Samples_data[[i]])
+  head(Samples_data[[i]])
+}
 
-# Rename vector
-names(sensor_name_unit) <- c("Sensor", "Unit")
-
-# Read in data
-dataTXT <- read.table(TXT_files[i], skip = 4, sep = ";")
-names(dataTXT) <- c(sensor_name_unit[["Sensor"]], "Step")
-comment(dataTXT) <- c(sensor_name_unit, samples_ID[i], messung[i], filen[i])
+# rbind all files for all samples
+all_data <- do.call(rbind, Samples_data)
+str(all_data)
+head(all_data)
 ```
 
 
