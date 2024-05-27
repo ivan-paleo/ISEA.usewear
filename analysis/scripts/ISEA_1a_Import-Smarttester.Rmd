@@ -103,7 +103,10 @@ library(tidyverse)
 ---
 
 
-# List all files and get names of the files  
+# Read in TXT files
+
+DO NOT FORGET TO PROCESS ISEA-EX3!
+
 ```{r}
 # Create dataframe containing identification of folders
 #folders <- data.frame(bamboo = c(0, -7.5, -15, 7.5, 15), Weg = seq(1, 30, 6), Stroke = seq(2, 30, 6), Velocity = seq(3, 30, 6), 
@@ -111,11 +114,10 @@ library(tidyverse)
 folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5), 
                       folder = seq_len(30)[-seq(from = 6, to = 30, by = 6)])
 
-
 # Extract sample IDs from folder names
 Samples_ID <- dir(dir_in)
 
-# Exclude EX3 for now = TO ADJUST LATER
+# Exclude EX3 for now - TO ADJUST LATER
 Samples_ID <- Samples_ID[Samples_ID != "ISEA-EX3"]
 
 # Create list, 1 element for each sample
@@ -138,7 +140,7 @@ for (i in seq_along(Samples_ID)) {
   for (j in seq_along(TXT_files)) {
     
   # Extract sensor's name and unit from the TXT file
-                      # Info on Line 3
+               # Info on Line 3
   name_unit <- unlist(read.table(TXT_files[j], skip = 2, nrows = 1, sep = ";", fileEncoding = 'WINDOWS-1252')) %>% 
                     
                # Format name and unit
@@ -149,12 +151,13 @@ for (i in seq_along(Samples_ID)) {
   # Extract folder and file names from path
   messung <- as.numeric(gsub("Messung|Date[0-9]*", "", basename(dirname(TXT_files[j]))))
   smartfile <- as.numeric(gsub("SmartDatafiles000000|.txt", "", basename(TXT_files[j])))
-  #bamboo <- unique(folders[folders$folder == messung, "bamboo"])
+  bamboo <- unique(folders[folders$folder == messung, "bamboo"])
   
   # Read in and format data
   TXT_data[[j]] <- read.table(TXT_files[j], skip = 4, sep = ";") %>%
-                   #mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Bamboo_position = bamboo) %>%
-                   mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Sensor_name = name_unit) %>%
+                   mutate(Sample = Samples_ID[i], File = smartfile, Bamboo_position = bamboo, Sensor_name = name_unit) %>%
+                   #mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Sensor_name = name_unit) %>%
+                   #mutate(Sample = Samples_ID[i], File = smartfile, Sensor_name = name_unit) %>%
                    rename(Sensor_value = "V1", Step = "V2")
   }
   
@@ -165,9 +168,55 @@ for (i in seq_along(Samples_ID)) {
 }
 
 # rbind all files for all samples
-all_data <- do.call(rbind, Samples_data)
+all_data <- do.call(rbind, Samples_data) %>% 
+            arrange(Sample, File, Bamboo_position, Sensor_name, Step)
 str(all_data)
 head(all_data)
+```
+
+
+---
+
+
+# Format data
+
+## Pivot to wider format
+Create one column (variable) for each sensor and create an empty column for the stroke number.
+
+```{r}
+wide_data <- pivot_wider(all_data, names_from = Sensor_name, values_from = Sensor_value) %>% 
+             mutate(Bamboo_position = factor(Bamboo_position, levels = unique(folders$bamboo)), Stroke = NA) %>% 
+             arrange(Sample, File, Bamboo_position, Step) %>% 
+             as.data.frame()
+str(wide_data)
+head(wide_data)
+```
+
+
+## Add stroke number
+```{r}
+wide_data[1, "Stroke"] <- 1
+test <- group_by(wide_data, Sample) %>% 
+    mutate(changes = c(0, diff(diff(`Stroke [mm]`)), 0) != 0)
+View(test) 
+
+x <- split(wide_data, wide_data$Sample)
+x1 <- x[[1]]
+x1[1:10, "Stroke [mm]"]
+diff(x1[["Stroke [mm]"]])[1:12]
+diff(diff(x1[["Stroke [mm]"]]))[1:12]
+
+
+```
+
+
+---
+
+
+# Save data
+```{r}
+write_ods(all_data, path = paste0(dir_out, "/ISEA_use-wear_all-data.ods"))
+write_ods(wide_data, path = paste0(dir_out, "/ISEA_use-wear_wide-data.ods"))
 ```
 
 

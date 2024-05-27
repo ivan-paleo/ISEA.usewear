@@ -1,7 +1,7 @@
 Import dataset from Smarttester’s sensor for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-05-17 15:12:16 CEST
+2024-05-27 11:07:08 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -330,37 +330,38 @@ sessionInfo()
     other attached packages:
      [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
      [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
-     [9] ggplot2_3.5.0     tidyverse_2.0.0   rmarkdown_2.26    readODS_2.2.0    
-    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.45       
-    [17] grateful_0.2.4   
+     [9] ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27    readODS_2.2.0    
+    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.46       
+    [17] grateful_0.2.7   
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.4      jsonlite_1.8.8    compiler_4.3.3    tidyselect_1.2.1 
-     [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.1.1    
+     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.3.3    tidyselect_1.2.1 
+     [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.2.0    
      [9] R6_2.5.1          generics_0.1.3    munsell_0.5.1     rprojroot_2.0.4  
     [13] tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0      rlang_1.1.3      
-    [17] utf8_1.2.4        stringi_1.8.3     cachem_1.0.8      xfun_0.43        
+    [17] utf8_1.2.4        stringi_1.8.4     cachem_1.1.0      xfun_0.44        
     [21] sass_0.4.9        timechange_0.3.0  cli_3.6.2         withr_3.0.0      
     [25] magrittr_2.0.3    digest_0.6.35     grid_4.3.3        rstudioapi_0.16.0
     [29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23    
     [33] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  tools_4.3.3      
-    [37] pkgconfig_2.0.3   htmltools_0.5.8  
+    [37] pkgconfig_2.0.3   htmltools_0.5.8.1
 
 ------------------------------------------------------------------------
 
 # Cite R packages used
 
-| Package     | Version | Citation                                                                                      |
-|:------------|:--------|:----------------------------------------------------------------------------------------------|
-| base        | 4.3.3   | R Core Team (2024)                                                                            |
-| grateful    | 0.2.4   | Francisco Rodriguez-Sanchez and Connor P. Jackson (2023)                                      |
-| knitr       | 1.45    | Xie (2014); Xie (2015); Xie (2023)                                                            |
-| R.methodsS3 | 1.8.2   | Bengtsson (2003a)                                                                             |
-| R.oo        | 1.26.0  | Bengtsson (2003b)                                                                             |
-| R.utils     | 2.12.3  | Bengtsson (2023)                                                                              |
-| readODS     | 2.2.0   | Schutten et al. (2024)                                                                        |
-| rmarkdown   | 2.26    | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
-| tidyverse   | 2.0.0   | Wickham et al. (2019)                                                                         |
+| Package     | Version       | Citation                                                                                      |
+|:------------|:--------------|:----------------------------------------------------------------------------------------------|
+| base        | 4.3.3         | R Core Team (2024)                                                                            |
+| grateful    | 0.2.7         | Rodriguez-Sanchez and Jackson (2023)                                                          |
+| knitr       | 1.46          | Xie (2014); Xie (2015); Xie (2024)                                                            |
+| R.methodsS3 | 1.8.2         | Bengtsson (2003a)                                                                             |
+| R.oo        | 1.26.0        | Bengtsson (2003b)                                                                             |
+| R.utils     | 2.12.3        | Bengtsson (2023)                                                                              |
+| readODS     | 2.2.0         | Schutten et al. (2024)                                                                        |
+| rmarkdown   | 2.27          | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
+| tidyverse   | 2.0.0         | Wickham et al. (2019)                                                                         |
+| RStudio     | 2023.12.1.402 | Posit team (2024)                                                                             |
 
 ## References
 
@@ -406,11 +407,10 @@ Utilities*. <https://CRAN.R-project.org/package=R.utils>.
 
 </div>
 
-<div id="ref-grateful" class="csl-entry">
+<div id="ref-rstudio" class="csl-entry">
 
-Francisco Rodriguez-Sanchez, and Connor P. Jackson. 2023.
-*<span class="nocase">grateful</span>: Facilitate Citation of r
-Packages*. <https://pakillo.github.io/grateful/>.
+Posit team. 2024. *RStudio: Integrated Development Environment for r*.
+Boston, MA: Posit Software, PBC. <http://www.posit.co/>.
 
 </div>
 
@@ -419,6 +419,14 @@ Packages*. <https://pakillo.github.io/grateful/>.
 R Core Team. 2024. *R: A Language and Environment for Statistical
 Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 <https://www.R-project.org/>.
+
+</div>
+
+<div id="ref-grateful" class="csl-entry">
+
+Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
+*<span class="nocase">grateful</span>: Facilitate Citation of r
+Packages*. <https://pakillo.github.io/grateful/>.
 
 </div>
 
@@ -455,9 +463,9 @@ Florida: Chapman; Hall/CRC. <https://yihui.org/knitr/>.
 
 </div>
 
-<div id="ref-knitr2023" class="csl-entry">
+<div id="ref-knitr2024" class="csl-entry">
 
-———. 2023. *<span class="nocase">knitr</span>: A General-Purpose Package
+———. 2024. *<span class="nocase">knitr</span>: A General-Purpose Package
 for Dynamic Report Generation in r*. <https://yihui.org/knitr/>.
 
 </div>
