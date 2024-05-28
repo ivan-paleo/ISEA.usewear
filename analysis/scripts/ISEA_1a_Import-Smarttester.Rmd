@@ -43,7 +43,7 @@ In order to smooth the saving and storing of the files, the sensors' data were e
 
 There are 20 files per folder, where each file recorded 20 strokes, meaning that a total of 400 strokes were performed at each angle. With 5 angles, a total 2000 strokes was recorded per sample.  
 
-With 20 files per folder and a folder for each combination of angle (5), sensor (5) and sample (12), a total of `r 20*5*5*12` TXT files were saved.
+With 20 files per folder and a folder for each combination of angle (5), sensor (5) and sample (12), a total of `r 20*5*5*12` TXT files were saved. Nevertheless, there were issues during the experiment with ISEA-EX3 so that the first 400 strokes with that sample were not usable. Still, `r 20*5*5*11 + 400` TXT files were used.
 
 Therefore, for each sample:
 
@@ -69,7 +69,7 @@ For example:
 - in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
 - in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000001.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 101-120  
 - in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung1Date20231212131525", the file "SmartDatafiles00000019.txt" gives the readings of `Depth` at angle = 0° for sample ISEA-EX1 for the strokes 1901-1920  
-- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung2Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Position` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
+- in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung2Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `X_position` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
 - in the folder "analysis/raw_data/Smarttester/ISEA-EX1/Messung7Date20231212131525", the file "SmartDatafiles00000000.txt" gives the readings of `Depth` at angle = -7.5° for sample ISEA-EX1 for the strokes 21-40 
 
 ```{r}
@@ -78,7 +78,7 @@ dir_out <- "analysis/derived_data/"
 ```
 
 
-Due to the huge number of TXT files (`r 20*5*5*12`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`" for running the script. They can be accessed on Zenodo: 
+Due to the huge number of TXT files (`r 20*5*5*11 + 400`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`" for running the script. They can be accessed on Zenodo: *add DOI*
 
 Formatted data will be saved in "`r dir_out`".
 

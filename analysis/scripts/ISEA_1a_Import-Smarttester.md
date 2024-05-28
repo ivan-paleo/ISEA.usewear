@@ -1,7 +1,7 @@
 Import dataset from Smarttester’s sensors for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-05-28 12:24:27 CEST
+2024-05-28 12:37:20 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -56,6 +56,9 @@ angles, a total 2000 strokes was recorded per sample.
 
 With 20 files per folder and a folder for each combination of angle (5),
 sensor (5) and sample (12), a total of 6000 TXT files were saved.
+Nevertheless, there were issues during the experiment with ISEA-EX3 so
+that the first 400 strokes with that sample were not usable. Still, 5900
+TXT files were used.
 
 Therefore, for each sample:
 
@@ -89,8 +92,8 @@ For example:
   angle = 0° for sample ISEA-EX1 for the strokes 1901-1920  
 - in the folder
   “analysis/raw_data/Smarttester/ISEA-EX1/Messung2Date20231212131525”,
-  the file “SmartDatafiles00000000.txt” gives the readings of `Position`
-  at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
+  the file “SmartDatafiles00000000.txt” gives the readings of
+  `X_position` at angle = 0° for sample ISEA-EX1 for the strokes 1-20  
 - in the folder
   “analysis/raw_data/Smarttester/ISEA-EX1/Messung7Date20231212131525”,
   the file “SmartDatafiles00000000.txt” gives the readings of `Depth` at
@@ -101,10 +104,10 @@ dir_in <- "D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data"
 dir_out <- "analysis/derived_data/"
 ```
 
-Due to the huge number of TXT files (6000), it was not possible to
+Due to the huge number of TXT files (5900), it was not possible to
 upload them to GitHub. They were therefore stored and accessed locally
 in “D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data” for running the
-script. They can be accessed on Zenodo:
+script. They can be accessed on Zenodo: *add DOI*
 
 Formatted data will be saved in “analysis/derived_data/”.
 

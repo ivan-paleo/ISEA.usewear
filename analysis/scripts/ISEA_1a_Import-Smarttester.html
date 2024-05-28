@@ -1575,7 +1575,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Import dataset from Smarttester’s sensors
 for the ISEA use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-05-28 12:23:55 CEST</h4>
+<h4 class="date">2024-05-28 12:36:48 CEST</h4>
 
 </div>
 
@@ -1618,8 +1618,10 @@ structure.</p>
 meaning that a total of 400 strokes were performed at each angle. With 5
 angles, a total 2000 strokes was recorded per sample.</p>
 <p>With 20 files per folder and a folder for each combination of angle
-(5), sensor (5) and sample (12), a total of 6000 TXT files were
-saved.</p>
+(5), sensor (5) and sample (12), a total of 6000 TXT files were saved.
+Nevertheless, there were issues during the experiment with ISEA-EX3 so
+that the first 400 strokes with that sample were not usable. Still, 5900
+TXT files were used.</p>
 <p>Therefore, for each sample:</p>
 <ul>
 <li>The folders ‘Messung1…’ to ‘Messung5…’ represent the readings for
@@ -1659,8 +1661,8 @@ file “SmartDatafiles00000019.txt” gives the readings of
 <li>in the folder
 “analysis/raw_data/Smarttester/ISEA-EX1/Messung2Date20231212131525”, the
 file “SmartDatafiles00000000.txt” gives the readings of
-<code>Position</code> at angle = 0° for sample ISEA-EX1 for the strokes
-1-20<br />
+<code>X_position</code> at angle = 0° for sample ISEA-EX1 for the
+strokes 1-20<br />
 </li>
 <li>in the folder
 “analysis/raw_data/Smarttester/ISEA-EX1/Messung7Date20231212131525”, the
@@ -1670,10 +1672,10 @@ file “SmartDatafiles00000000.txt” gives the readings of
 </ul>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>dir_in <span class="ot">&lt;-</span> <span class="st">&quot;D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data&quot;</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>dir_out <span class="ot">&lt;-</span> <span class="st">&quot;analysis/derived_data/&quot;</span></span></code></pre></div>
-<p>Due to the huge number of TXT files (6000), it was not possible to
+<p>Due to the huge number of TXT files (5900), it was not possible to
 upload them to GitHub. They were therefore stored and accessed locally
 in “D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data” for running the
-script. They can be accessed on Zenodo:</p>
+script. They can be accessed on Zenodo: <em>add DOI</em></p>
 <p>Formatted data will be saved in “analysis/derived_data/”.</p>
 <p>The knit directory for this script is the project directory.</p>
 <hr />
