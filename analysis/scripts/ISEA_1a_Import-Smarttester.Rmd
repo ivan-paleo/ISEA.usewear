@@ -1,5 +1,5 @@
 ---
-title: "Import dataset from Smarttester's sensor for the ISEA use-wear project"
+title: "Import dataset from Smarttester's sensors for the ISEA use-wear project"
 author: "Ivan Calandra"
 date: "`r format(Sys.time(), usetz = TRUE)`"
 output:
@@ -37,7 +37,7 @@ The script will:
 
 For each sample, each TXT file represents 10 back-and-fourth movements (= 20 strokes) for a given sensor. After 20 strokes, the bamboo worked piece was rotated.  
 There were 5 positions (angles) for the bamboo: 0, -7.5, -15, +7.5 and +15°.  
-There were 5 sensors: depth sensor (`Depth`), position (`Position`) and velocity (`Velocity`) along the X (movement) axis, and angle (`Angle`) and torque (`Torque`) of the rotary drive for the bamboo. Readings from each sensor are saved in a separate folder. It is possible to save up to 6 sensors' readings, so the folders are numbered from 1 to 6 (or multiples thereof, see below), even though we used only 5.  
+There were 5 sensors: depth sensor (`Depth`), position (`X_position`) and velocity (`X_velocity`) along the X (movement) axis, and angle (`Angle`) and torque (`Torque`) of the rotary drive for the bamboo. Readings from each sensor are saved in a separate folder. It is possible to save up to 6 sensors' readings, so the folders are numbered from 1 to 6 (or multiples thereof, see below), even though we used only 5.  
 
 In order to smooth the saving and storing of the files, the sensors' data were exported (written) after 20 strokes (hence each TXT file represents 20 strokes). However, the readings for each angle were saved in different folders, adding to the complexity of the folder structure.
 
@@ -95,8 +95,6 @@ library(R.utils)
 library(readODS)
 library(rmarkdown)
 library(tidyverse)
-#library(openxlsx)
-#library(tools)
 ```
 
 
@@ -105,12 +103,10 @@ library(tidyverse)
 
 # Read in TXT files
 
-DO NOT FORGET TO PROCESS ISEA-EX3!
+**DO NOT FORGET TO PROCESS ISEA-EX3!**
 
 ```{r}
 # Create dataframe containing identification of folders
-#folders <- data.frame(bamboo = c(0, -7.5, -15, 7.5, 15), Weg = seq(1, 30, 6), Stroke = seq(2, 30, 6), Velocity = seq(3, 30, 6), 
-#                      Angle = seq(4, 30, 6), Torque = seq(5, 30, 6))
 folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5), 
                       folder = seq_len(30)[-seq(from = 6, to = 30, by = 6)])
 
@@ -141,12 +137,16 @@ for (i in seq_along(Samples_ID)) {
     
   # Extract sensor's name and unit from the TXT file
                # Info on Line 3
-  name_unit <- unlist(read.table(TXT_files[j], skip = 2, nrows = 1, sep = ";", fileEncoding = 'WINDOWS-1252')) %>% 
+  name_unit <- unlist(read.table(TXT_files[j], skip = 2, nrows = 1, sep = ";", 
+                                 fileEncoding = 'WINDOWS-1252')) %>% 
                     
                # Format name and unit
                gsub("in ", "[", .)  %>% 
                paste0(., "]") %>%
-               gsub("E2: ", "", .)
+               gsub("E2: ", "", .) %>% 
+               gsub("Stroke", "X_position", .) %>% 
+               gsub("Weg", "Depth", .) %>% 
+               gsub("Velocity", "X_velocity", .)
   
   # Extract folder and file names from path
   messung <- as.numeric(gsub("Messung|Date[0-9]*", "", basename(dirname(TXT_files[j]))))
@@ -155,9 +155,8 @@ for (i in seq_along(Samples_ID)) {
   
   # Read in and format data
   TXT_data[[j]] <- read.table(TXT_files[j], skip = 4, sep = ";") %>%
-                   mutate(Sample = Samples_ID[i], File = smartfile, Bamboo_position = bamboo, Sensor_name = name_unit) %>%
-                   #mutate(Sample = Samples_ID[i], Folder = messung, File = smartfile, Sensor_name = name_unit) %>%
-                   #mutate(Sample = Samples_ID[i], File = smartfile, Sensor_name = name_unit) %>%
+                   mutate(Sample = Samples_ID[i], File = smartfile, Bamboo_position = bamboo, 
+                          Sensor_name = name_unit) %>%
                    rename(Sensor_value = "V1", Step = "V2")
   }
   
@@ -185,7 +184,8 @@ Create one column (variable) for each sensor and create an empty column for the 
 
 ```{r}
 wide_data <- pivot_wider(all_data, names_from = Sensor_name, values_from = Sensor_value) %>% 
-             mutate(Bamboo_position = factor(Bamboo_position, levels = unique(folders$bamboo)), Stroke = NA) %>% 
+             mutate(Bamboo_position = factor(Bamboo_position, levels = unique(folders$bamboo)), 
+                    StrokeNr = NA) %>% 
              arrange(Sample, File, Bamboo_position, Step) %>% 
              as.data.frame()
 str(wide_data)
@@ -195,18 +195,77 @@ head(wide_data)
 
 ## Add stroke number
 ```{r}
-wide_data[1, "Stroke"] <- 1
-test <- group_by(wide_data, Sample) %>% 
-    mutate(changes = c(0, diff(diff(`Stroke [mm]`)), 0) != 0)
-View(test) 
+# Split by sample to work on each sample separately
+split_sample <- split(wide_data, wide_data$Sample)
 
-x <- split(wide_data, wide_data$Sample)
-x1 <- x[[1]]
-x1[1:10, "Stroke [mm]"]
-diff(x1[["Stroke [mm]"]])[1:12]
-diff(diff(x1[["Stroke [mm]"]]))[1:12]
+# Create empty data.frame to contain a summary table of the number of detected strokes per sample
+num_stroke <- data.frame(Sample = names(split_sample), NumberStrokes = rep(NA, length(names(split_sample))))
+
+# For each sample
+for (i in seq_along(split_sample)) {
+  
+  # Start the first stroke at the first row
+  split_sample[[i]][1, "StrokeNr"] <- 1
+  
+  # Calculate the lagged difference between successive values of the X position ("Stroke [mm]")
+  diff_stroke <- diff(split_sample[[i]][["X_position [mm]"]])
+  
+  # Duplicate the first value to have the same length as the original values
+  diff_stroke <- c(diff_stroke[1], diff_stroke)
+  
+  # Identify differences of 0
+  diff_stroke_0 <- which(diff_stroke == 0)
+  
+  # Replace the 0s with the previous value
+  diff_stroke[diff_stroke_0] <- diff_stroke[diff_stroke_0 - 1]
+  
+  # Create empty vector to contain the result
+  sign_diff_stroke <- vector(mode = "logical", length = length(diff_stroke))
+  
+  # For each difference (starting at the second value)
+  for (j in 2:length(diff_stroke)) {
+    
+    # Identify inversions in the sign of the difference, i.e. when the drive starts moving in the other direction
+    sign_diff_stroke[j] <- sign(diff_stroke[j]) != sign(diff_stroke[j-1])
+  }
+  
+  # Identify inversions in the sign of the differences
+  inv_stroke <- which(sign_diff_stroke)
+  
+  # Fill the data.frame num_stroke with the number of inversions + 1 (because it starts at stroke number 2)
+  num_stroke[i, "NumberStrokes"] <- length(inv_stroke) + 1
+  
+  # For each inversion in the sign of the difference, 
+  # using the index of the inversion - 1 in order to compensate for the lag,
+  # increment the stroke number (starting at 2 because the 1st stroke was added manually at the 1st row)
+  split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 1
+  
+  # Fill the stroke number down to fill in the rows of identical stroke numbers
+  split_sample[[i]] <- fill(split_sample[[i]], StrokeNr)
+}
+
+# rbind all samples into a single data.frame
+final_data <- do.call(rbind, split_sample)
+```
+
+The number of inversions (= strokes) detected in the sensor's readings for each sample is as follow: 
+
+```{r, echo = FALSE}
+num_stroke
+```
 
 
+## Reorder columns and renumber rows
+```{r}
+final_data <- final_data[c(2:4, 1, 10, 5:9)]
+row.names(final_data) <- NULL
+```
+
+
+## Check result
+```{r}
+str(final_data)
+head(final_data)
 ```
 
 
@@ -215,8 +274,7 @@ diff(diff(x1[["Stroke [mm]"]]))[1:12]
 
 # Save data
 ```{r}
-write_ods(all_data, path = paste0(dir_out, "/ISEA_use-wear_all-data.ods"))
-write_ods(wide_data, path = paste0(dir_out, "/ISEA_use-wear_wide-data.ods"))
+write_ods(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.ods"))
 ```
 
 
