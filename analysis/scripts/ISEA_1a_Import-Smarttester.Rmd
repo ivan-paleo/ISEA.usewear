@@ -43,7 +43,7 @@ In order to smooth the saving and storing of the files, the sensors' data were e
 
 There are 20 files per folder, where each file recorded 20 strokes, meaning that a total of 400 strokes were performed at each angle. With 5 angles, a total 2000 strokes was recorded per sample.  
 
-With 20 files per folder and a folder for each combination of angle (5), sensor (5) and sample (12), a total of `r 20*5*5*12` TXT files were saved. Nevertheless, there were issues during the experiment with ISEA-EX3 so that the first 400 strokes with that sample were not usable. Still, `r 20*5*5*11 + 400` TXT files were used.
+With 20 files per folder and a folder for each combination of angle (5), sensor (5) and sample (12), a total of `r 20*5*5*12` TXT files were saved. Nevertheless, there were issues during the experiment with ISEA-EX3 so that the readings of the first 400 strokes with that sample were not usable.
 
 Therefore, for each sample:
 
@@ -78,7 +78,7 @@ dir_out <- "analysis/derived_data/"
 ```
 
 
-Due to the huge number of TXT files (`r 20*5*5*11 + 400`), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`" for running the script. They can be accessed on Zenodo: *add DOI*
+Due to the huge number of TXT files (see below), it was not possible to upload them to GitHub. They were therefore stored and accessed locally in "`r dir_in`" for running the script. They can be accessed on Zenodo: *add DOI*
 
 Formatted data will be saved in "`r dir_out`".
 
@@ -103,8 +103,6 @@ library(tidyverse)
 
 # Read in TXT files
 
-**DO NOT FORGET TO PROCESS ISEA-EX3!**
-
 ```{r}
 # Create dataframe containing identification of folders
 folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5), 
@@ -113,11 +111,11 @@ folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5),
 # Extract sample IDs from folder names
 Samples_ID <- dir(dir_in)
 
-# Exclude EX3 for now - TO ADJUST LATER
-Samples_ID <- Samples_ID[Samples_ID != "ISEA-EX3"]
-
 # Create list, 1 element for each sample
 Samples_data <- vector(mode = "list", length = length(Samples_ID)) 
+
+# Create empty data.frame to contain a summary table of the number of detected TXT files per sample
+num_txt <- data.frame(Sample = Samples_ID, NumberTXT = rep(NA, length(Samples_ID)))
 
 # For each sample
 for (i in seq_along(Samples_ID)) {
@@ -125,8 +123,12 @@ for (i in seq_along(Samples_ID)) {
   # List all TXT files in dir_in/Samples_ID
   TXT_files <- list.files(paste(dir_in, Samples_ID[i], sep = "/"), 
                           pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
+  
   # Display number of TXT files
   cat(length(TXT_files), "TXT files were found for sample", Samples_ID[i], "\n")
+  
+  # Save number of TXT files in num_txt
+  num_txt[i, "NumberTXT"] <- length(TXT_files)
   
   # Import all TXT files 
   # Create list, 1 element for each TXT file
@@ -173,6 +175,17 @@ str(all_data)
 head(all_data)
 ```
 
+The number of TXT files read in for each sample is as follow: 
+
+```{r, echo = FALSE}
+num_txt_order <- num_txt %>% 
+                 mutate(SampleNr = as.numeric(gsub("ISEA-EX", "", num_txt$Sample))) %>% 
+                 arrange(SampleNr)
+num_txt_order[1:2]
+```
+
+In total, `r sum(num_txt_order$NumberTXT)` TXT files have been read in.
+
 
 ---
 
@@ -205,7 +218,12 @@ num_stroke <- data.frame(Sample = names(split_sample), NumberStrokes = rep(NA, l
 for (i in seq_along(split_sample)) {
   
   # Start the first stroke at the first row
-  split_sample[[i]][1, "StrokeNr"] <- 1
+  # For ISEA-EX3, the first stroke in the dataset is stroke number 401
+  if (grepl("ISEA-EX3", names(split_sample)[i])) {
+    split_sample[[i]][1, "StrokeNr"] <- 401
+  } else {
+    split_sample[[i]][1, "StrokeNr"] <- 1
+  }
   
   # Calculate the lagged difference between successive values of the X position ("Stroke [mm]")
   diff_stroke <- diff(split_sample[[i]][["X_position [mm]"]])
@@ -237,8 +255,14 @@ for (i in seq_along(split_sample)) {
   
   # For each inversion in the sign of the difference, 
   # using the index of the inversion - 1 in order to compensate for the lag,
-  # increment the stroke number (starting at 2 because the 1st stroke was added manually at the 1st row)
-  split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 1
+  # increment the stroke number.
+  # Stroke number starts at 2 because the 1st stroke was added manually at the 1st row
+  # In case of ISEA-EX3, the stroke number starts at 402 because the first 400 strokes were not recorded properly
+  if (grepl("ISEA-EX3", names(split_sample)[i])) {
+    split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 401
+  } else {
+    split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 1
+  }
   
   # Fill the stroke number down to fill in the rows of identical stroke numbers
   split_sample[[i]] <- fill(split_sample[[i]], StrokeNr)
@@ -251,7 +275,10 @@ final_data <- do.call(rbind, split_sample)
 The number of inversions (= strokes) detected in the sensor's readings for each sample is as follow: 
 
 ```{r, echo = FALSE}
-num_stroke
+num_stroke_order <- num_stroke %>% 
+                    mutate(SampleNr = as.numeric(gsub("ISEA-EX", "", num_stroke$Sample))) %>% 
+                    arrange(SampleNr)
+num_stroke_order[1:2]
 ```
 
 

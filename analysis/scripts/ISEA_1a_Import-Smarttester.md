@@ -1,7 +1,7 @@
 Import dataset from Smarttester’s sensors for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-05-28 12:37:20 CEST
+2024-06-03 17:29:15 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -57,8 +57,8 @@ angles, a total 2000 strokes was recorded per sample.
 With 20 files per folder and a folder for each combination of angle (5),
 sensor (5) and sample (12), a total of 6000 TXT files were saved.
 Nevertheless, there were issues during the experiment with ISEA-EX3 so
-that the first 400 strokes with that sample were not usable. Still, 5900
-TXT files were used.
+that the readings of the first 400 strokes with that sample were not
+usable.
 
 Therefore, for each sample:
 
@@ -104,7 +104,7 @@ dir_in <- "D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data"
 dir_out <- "analysis/derived_data/"
 ```
 
-Due to the huge number of TXT files (5900), it was not possible to
+Due to the huge number of TXT files (see below), it was not possible to
 upload them to GitHub. They were therefore stored and accessed locally
 in “D:/Data/ISEA_use-wear/3_Experiments_Inotec/Data” for running the
 script. They can be accessed on Zenodo: *add DOI*
@@ -130,8 +130,6 @@ library(tidyverse)
 
 # Read in TXT files
 
-**DO NOT FORGET TO PROCESS ISEA-EX3!**
-
 ``` r
 # Create dataframe containing identification of folders
 folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5), 
@@ -140,11 +138,11 @@ folders <- data.frame(bamboo = rep(c(0, -7.5, -15, 7.5, 15), each = 5),
 # Extract sample IDs from folder names
 Samples_ID <- dir(dir_in)
 
-# Exclude EX3 for now - TO ADJUST LATER
-Samples_ID <- Samples_ID[Samples_ID != "ISEA-EX3"]
-
 # Create list, 1 element for each sample
 Samples_data <- vector(mode = "list", length = length(Samples_ID)) 
+
+# Create empty data.frame to contain a summary table of the number of detected TXT files per sample
+num_txt <- data.frame(Sample = Samples_ID, NumberTXT = rep(NA, length(Samples_ID)))
 
 # For each sample
 for (i in seq_along(Samples_ID)) {
@@ -152,8 +150,12 @@ for (i in seq_along(Samples_ID)) {
   # List all TXT files in dir_in/Samples_ID
   TXT_files <- list.files(paste(dir_in, Samples_ID[i], sep = "/"), 
                           pattern = "\\.txt$", recursive = TRUE, full.names = TRUE)
+  
   # Display number of TXT files
   cat(length(TXT_files), "TXT files were found for sample", Samples_ID[i], "\n")
+  
+  # Save number of TXT files in num_txt
+  num_txt[i, "NumberTXT"] <- length(TXT_files)
   
   # Import all TXT files 
   # Create list, 1 element for each TXT file
@@ -234,6 +236,14 @@ for (i in seq_along(Samples_ID)) {
      $ File           : num  0 0 0 0 0 0 0 0 0 0 ...
      $ Bamboo_position: num  -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 ...
      $ Sensor_name    : chr  "Angle [°]" "Angle [°]" "Angle [°]" "Angle [°]" ...
+    400 TXT files were found for sample ISEA-EX3 
+    'data.frame':   43605 obs. of  6 variables:
+     $ Sensor_value   : num  -7.51 -7.57 -8.3 -8.44 -8.43 ...
+     $ Step           : int  0 100000 200000 300000 400000 500000 600000 700000 800000 900000 ...
+     $ Sample         : chr  "ISEA-EX3" "ISEA-EX3" "ISEA-EX3" "ISEA-EX3" ...
+     $ File           : num  0 0 0 0 0 0 0 0 0 0 ...
+     $ Bamboo_position: num  -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 -7.5 ...
+     $ Sensor_name    : chr  "Angle [°]" "Angle [°]" "Angle [°]" "Angle [°]" ...
     500 TXT files were found for sample ISEA-EX4 
     'data.frame':   54235 obs. of  6 variables:
      $ Sensor_value   : num  -7.49 -7.58 -8.41 -8.33 -8.27 ...
@@ -290,7 +300,7 @@ all_data <- do.call(rbind, Samples_data) %>%
 str(all_data)
 ```
 
-    'data.frame':   527370 obs. of  6 variables:
+    'data.frame':   570975 obs. of  6 variables:
      $ Sensor_value   : num  -15 -15 -15.9 -15.9 -15.9 ...
      $ Step           : int  0 100000 200000 300000 400000 500000 600000 700000 800000 900000 ...
      $ Sample         : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
@@ -310,6 +320,24 @@ head(all_data)
     5    -15.87985 400000 ISEA-EX1    0             -15   Angle [°]
     6    -15.83350 500000 ISEA-EX1    0             -15   Angle [°]
 
+The number of TXT files read in for each sample is as follow:
+
+          Sample NumberTXT
+    1   ISEA-EX1       500
+    2   ISEA-EX2       500
+    3   ISEA-EX3       400
+    4   ISEA-EX4       500
+    5   ISEA-EX5       500
+    6   ISEA-EX6       500
+    7   ISEA-EX7       500
+    8   ISEA-EX8       500
+    9   ISEA-EX9       500
+    10 ISEA-EX10       500
+    11 ISEA-EX11       500
+    12 ISEA-EX12       500
+
+In total, 5900 TXT files have been read in.
+
 ------------------------------------------------------------------------
 
 # Format data
@@ -328,7 +356,7 @@ wide_data <- pivot_wider(all_data, names_from = Sensor_name, values_from = Senso
 str(wide_data)
 ```
 
-    'data.frame':   105474 obs. of  10 variables:
+    'data.frame':   114195 obs. of  10 variables:
      $ Step             : int  0 100000 200000 300000 400000 500000 600000 700000 800000 900000 ...
      $ Sample           : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
      $ File             : num  0 0 0 0 0 0 0 0 0 0 ...
@@ -372,7 +400,12 @@ num_stroke <- data.frame(Sample = names(split_sample), NumberStrokes = rep(NA, l
 for (i in seq_along(split_sample)) {
   
   # Start the first stroke at the first row
-  split_sample[[i]][1, "StrokeNr"] <- 1
+  # For ISEA-EX3, the first stroke in the dataset is stroke number 401
+  if (grepl("ISEA-EX3", names(split_sample)[i])) {
+    split_sample[[i]][1, "StrokeNr"] <- 401
+  } else {
+    split_sample[[i]][1, "StrokeNr"] <- 1
+  }
   
   # Calculate the lagged difference between successive values of the X position ("Stroke [mm]")
   diff_stroke <- diff(split_sample[[i]][["X_position [mm]"]])
@@ -404,8 +437,14 @@ for (i in seq_along(split_sample)) {
   
   # For each inversion in the sign of the difference, 
   # using the index of the inversion - 1 in order to compensate for the lag,
-  # increment the stroke number (starting at 2 because the 1st stroke was added manually at the 1st row)
-  split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 1
+  # increment the stroke number.
+  # Stroke number starts at 2 because the 1st stroke was added manually at the 1st row
+  # In case of ISEA-EX3, the stroke number starts at 402 because the first 400 strokes were not recorded properly
+  if (grepl("ISEA-EX3", names(split_sample)[i])) {
+    split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 401
+  } else {
+    split_sample[[i]][inv_stroke - 1, "StrokeNr"] <- seq_along(inv_stroke) + 1
+  }
   
   # Fill the stroke number down to fill in the rows of identical stroke numbers
   split_sample[[i]] <- fill(split_sample[[i]], StrokeNr)
@@ -420,16 +459,17 @@ for each sample is as follow:
 
           Sample NumberStrokes
     1   ISEA-EX1          2000
-    2  ISEA-EX10          2000
-    3  ISEA-EX11          2000
-    4  ISEA-EX12          2000
-    5   ISEA-EX2          2000
-    6   ISEA-EX4          2000
-    7   ISEA-EX5          2000
-    8   ISEA-EX6          2000
-    9   ISEA-EX7          2000
-    10  ISEA-EX8          2000
-    11  ISEA-EX9          2000
+    2   ISEA-EX2          2000
+    3   ISEA-EX3          1600
+    4   ISEA-EX4          2000
+    5   ISEA-EX5          2000
+    6   ISEA-EX6          2000
+    7   ISEA-EX7          2000
+    8   ISEA-EX8          2000
+    9   ISEA-EX9          2000
+    10 ISEA-EX10          2000
+    11 ISEA-EX11          2000
+    12 ISEA-EX12          2000
 
 ## Reorder columns and renumber rows
 
@@ -444,7 +484,7 @@ row.names(final_data) <- NULL
 str(final_data)
 ```
 
-    'data.frame':   105474 obs. of  10 variables:
+    'data.frame':   114195 obs. of  10 variables:
      $ Sample           : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
      $ File             : num  0 0 0 0 0 0 0 0 0 0 ...
      $ Bamboo_position  : Factor w/ 5 levels "0","-7.5","-15",..: 1 1 1 1 1 1 1 1 1 1 ...
@@ -491,8 +531,8 @@ write_ods(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.ods"))
 sessionInfo()
 ```
 
-    R version 4.3.3 (2024-02-29 ucrt)
-    Platform: x86_64-w64-mingw32/x64 (64-bit)
+    R version 4.4.0 (2024-04-24 ucrt)
+    Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
     Matrix products: default
@@ -514,42 +554,43 @@ sessionInfo()
     other attached packages:
      [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
      [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
-     [9] ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27    readODS_2.2.0    
-    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.46       
+     [9] ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27    readODS_2.3.0    
+    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
     [17] grateful_0.2.7   
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.3.3    zip_2.3.1        
+     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    zip_2.3.1        
      [5] tidyselect_1.2.1  jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8       
      [9] fastmap_1.2.0     R6_2.5.1          generics_0.1.3    munsell_0.5.1    
     [13] rprojroot_2.0.4   tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0     
     [17] rlang_1.1.3       utf8_1.2.4        stringi_1.8.4     cachem_1.1.0     
     [21] xfun_0.44         sass_0.4.9        timechange_0.3.0  cli_3.6.2        
-    [25] withr_3.0.0       magrittr_2.0.3    digest_0.6.35     grid_4.3.3       
+    [25] withr_3.0.0       magrittr_2.0.3    digest_0.6.35     grid_4.4.0       
     [29] rstudioapi_0.16.0 hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
     [33] evaluate_0.23     glue_1.7.0        fansi_1.0.6       colorspace_2.1-0 
-    [37] tools_4.3.3       pkgconfig_2.0.3   htmltools_0.5.8.1
+    [37] tools_4.4.0       pkgconfig_2.0.3   htmltools_0.5.8.1
 
 ------------------------------------------------------------------------
 
 # Cite R packages used
 
-| Package     | Version       | Citation                                                                                      |
-|:------------|:--------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.3.3         | R Core Team (2024)                                                                            |
-| grateful    | 0.2.7         | Rodriguez-Sanchez and Jackson (2023)                                                          |
-| knitr       | 1.46          | Xie (2014); Xie (2015); Xie (2024)                                                            |
-| R.methodsS3 | 1.8.2         | Bengtsson (2003a)                                                                             |
-| R.oo        | 1.26.0        | Bengtsson (2003b)                                                                             |
-| R.utils     | 2.12.3        | Bengtsson (2023)                                                                              |
-| readODS     | 2.2.0         | Schutten et al. (2024)                                                                        |
-| rmarkdown   | 2.27          | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
-| tidyverse   | 2.0.0         | Wickham et al. (2019)                                                                         |
-| RStudio     | 2023.12.1.402 | Posit team (2024)                                                                             |
+| Package     | Version      | Citation                                                                                      |
+|:------------|:-------------|:----------------------------------------------------------------------------------------------|
+| base        | 4.4.0        | R Core Team (2024)                                                                            |
+| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
+| knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
+| R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
+| R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
+| R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
+| readODS     | 2.3.0        | Schutten et al. (2024)                                                                        |
+| rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
+| tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
+| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-rmarkdown2024" class="csl-entry">
 
