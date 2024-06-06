@@ -1,0 +1,126 @@
+---
+title: "Plot tools' weights dataset for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_2c_Plot-Weight.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+# Goal of the script
+This script imports and plots the tools' weights before and after the experiments.  
+The script will:
+
+1. Read in the original CSV-file  
+2. Save data as Rbin and XLSX  
+3. Plot 
+
+```{r}
+dir_in <- "analysis/raw_data/"
+dir_out <- "analysis/plots/"
+```
+
+Input CSV file file must be located in "`r paste0("./", dir_in)`".  
+Plots will be saved in "`r paste0("./", dir_out)`".
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(ggplot2)
+library(grateful)
+library(knitr)
+library(R.utils)
+library(rmarkdown)
+library(tidyverse)
+library(writexl)
+```
+
+
+---
+
+
+# Read in CSV file
+```{r}
+file_in <- list.files(dir_in, pattern = "weight\\.csv$", full.names = TRUE)
+weights <- read.csv(file_in, check.names = FALSE)
+str(weights)
+head(weights)
+```
+
+
+---
+
+
+# Save data
+## As XLSX
+```{r}
+write_xlsx(weights, path = paste0(dir_out, "/ISEA_use-wear_weights.xlsx"))
+```
+
+## As Rbin
+```{r}
+saveObject(weights, file = paste0(dir_out, "/ISEA_use-wear_weights.Rbin"))
+```
+
+Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
+```{r, eval = FALSE}
+library(R.utils)
+rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
+```
+
+
+---
+
+
+# Plot
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_2c_Plot-Weight")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
+
