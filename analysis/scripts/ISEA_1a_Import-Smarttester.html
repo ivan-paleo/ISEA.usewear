@@ -1576,7 +1576,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Import dataset from Smarttester’s sensors
 for the ISEA use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-06-03 17:28:40 CEST</h4>
+<h4 class="date">2024-06-06 12:06:19 CEST</h4>
 
 </div>
 
@@ -1595,8 +1595,8 @@ The script will:</p>
 <li>Format and merge the data for each sample</li>
 <li>Combines the data from the 12 samples into one file<br />
 </li>
-<li>Write an ODS file and save an R object ready for further analysis in
-R</li>
+<li>Write an XLSX file and save an R object ready for further analysis
+in R</li>
 </ol>
 <p>For each sample, each TXT file represents 10 back-and-fourth
 movements (= 20 strokes) for a given sensor. After 20 strokes, the
@@ -1686,9 +1686,9 @@ the script. They can be accessed on Zenodo: <em>add DOI</em></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(grateful)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">library</span>(readODS)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">library</span>(rmarkdown)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">library</span>(rmarkdown)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">library</span>(writexl)</span></code></pre></div>
 <hr />
 </div>
 <div id="read-in-txt-files" class="section level1" number="3">
@@ -2049,12 +2049,26 @@ renumber rows</h2>
 </div>
 <div id="save-data" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Save data</h1>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">write_ods</span>(final_data, <span class="at">path =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_Smarttester.ods&quot;</span>))</span></code></pre></div>
+<div id="as-xlsx" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> As XLSX</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(final_data, <span class="at">path =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_Smarttester.xlsx&quot;</span>))</span></code></pre></div>
+<p>Unfortunately, Git/GitHub/RStudio had issues pushing large ODS files
+created with <code>readODS::write_ods()</code>.</p>
+</div>
+<div id="as-rbin" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> As Rbin</h2>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">saveObject</span>(final_data, <span class="at">file =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_Smarttester.Rbin&quot;</span>))</span></code></pre></div>
+<p>Rbin files (e.g. <code>ISEA_use-wear_Smarttester.Rbin</code>) can be
+easily read into an R object (e.g. <code>rbin_data</code>) using the
+following code:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>rbin_data <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="st">&quot;ISEA_use-wear_Smarttester.Rbin&quot;</span>)</span></code></pre></div>
 <hr />
+</div>
 </div>
 <div id="sessioninfo" class="section level1" number="6">
 <h1><span class="header-section-number">6</span> sessionInfo()</h1>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>R version 4.4.0 (2024-04-24 ucrt)
 Platform: x86_64-w64-mingw32/x64
 Running under: Windows 10 x64 (build 19045)
@@ -2076,23 +2090,23 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
- [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
- [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
- [9] ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27    readODS_2.3.0    
+ [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
+ [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
+ [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27   
 [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
 [17] grateful_0.2.7   
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    zip_2.3.1        
- [5] tidyselect_1.2.1  jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8       
- [9] fastmap_1.2.0     R6_2.5.1          generics_0.1.3    munsell_0.5.1    
-[13] rprojroot_2.0.4   tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0     
-[17] rlang_1.1.3       utf8_1.2.4        stringi_1.8.4     cachem_1.1.0     
-[21] xfun_0.44         sass_0.4.9        timechange_0.3.0  cli_3.6.2        
-[25] withr_3.0.0       magrittr_2.0.3    digest_0.6.35     grid_4.4.0       
-[29] rstudioapi_0.16.0 hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
-[33] evaluate_0.23     glue_1.7.0        fansi_1.0.6       colorspace_2.1-0 
-[37] tools_4.4.0       pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
+ [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    tidyselect_1.2.1 
+ [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.2.0    
+ [9] R6_2.5.1          generics_0.1.3    munsell_0.5.1     rprojroot_2.0.4  
+[13] tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0      rlang_1.1.3      
+[17] utf8_1.2.4        stringi_1.8.4     cachem_1.1.0      xfun_0.44        
+[21] sass_0.4.9        timechange_0.3.0  cli_3.6.2         withr_3.0.0      
+[25] magrittr_2.0.3    digest_0.6.35     grid_4.4.0        rstudioapi_0.16.0
+[29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23    
+[33] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  tools_4.4.0      
+[37] pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
 <hr />
 </div>
 <div id="cite-r-packages-used" class="section level1" number="7">
@@ -2145,23 +2159,22 @@ used</h1>
 <td align="left"><span class="citation">Bengtsson (2023)</span></td>
 </tr>
 <tr class="odd">
-<td align="left">readODS</td>
-<td align="left">2.3.0</td>
-<td align="left"><span class="citation">Schutten et al.
-(2024)</span></td>
-</tr>
-<tr class="even">
 <td align="left">rmarkdown</td>
 <td align="left">2.27</td>
 <td align="left"><span class="citation">Xie, Allaire, and Grolemund
 (2018)</span>; <span class="citation">Xie, Dervieux, and Riederer
 (2020)</span>; <span class="citation">Allaire et al. (2024)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">tidyverse</td>
 <td align="left">2.0.0</td>
 <td align="left"><span class="citation">Wickham et al.
 (2019)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">writexl</td>
+<td align="left">1.5.0</td>
+<td align="left"><span class="citation">Ooms (2024)</span></td>
 </tr>
 <tr class="even">
 <td align="left">RStudio</td>
@@ -2197,6 +2210,11 @@ https://www.r-project.org/conferences/DSC-2003/Proceedings/. <a href="https://ww
 ———. 2023. <em><span class="nocase">R.utils</span>: Various Programming
 Utilities</em>. <a href="https://CRAN.R-project.org/package=R.utils">https://CRAN.R-project.org/package=R.utils</a>.
 </div>
+<div id="ref-writexl" class="csl-entry">
+Ooms, Jeroen. 2024. <em><span class="nocase">writexl</span>: Export Data
+Frames to Excel <span>“<span class="nocase">xlsx</span>”</span>
+Format</em>. <a href="https://CRAN.R-project.org/package=writexl">https://CRAN.R-project.org/package=writexl</a>.
+</div>
 <div id="ref-rstudio" class="csl-entry">
 Posit team. 2024. <em><span>RStudio</span>: Integrated Development
 Environment for r</em>. Boston, MA: Posit Software, PBC. <a href="http://www.posit.co/">http://www.posit.co/</a>.
@@ -2209,11 +2227,6 @@ Statistical Computing. <a href="https://www.R-project.org/">https://www.R-projec
 <div id="ref-grateful" class="csl-entry">
 Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023. <em><span class="nocase">grateful</span>: Facilitate Citation of r Packages</em>.
 <a href="https://pakillo.github.io/grateful/">https://pakillo.github.io/grateful/</a>.
-</div>
-<div id="ref-readODS" class="csl-entry">
-Schutten, Gerrit-Jan, Chung-hong Chan, Peter Brohan, Detlef Steuer, and
-Thomas J. Leeper. 2024. <em><span class="nocase">readODS</span>: Read
-and Write ODS Files</em>. <a href="https://CRAN.R-project.org/package=readODS">https://CRAN.R-project.org/package=readODS</a>.
 </div>
 <div id="ref-tidyverse" class="csl-entry">
 Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy

@@ -33,7 +33,7 @@ The script will:
 1. Read in the original TXT-files   
 2. Format and merge the data for each sample 
 3. Combines the data from the 12 samples into one file  
-4. Write an ODS file and save an R object ready for further analysis in R 
+4. Write an XLSX file and save an R object ready for further analysis in R 
 
 For each sample, each TXT file represents 10 back-and-fourth movements (= 20 strokes) for a given sensor. After 20 strokes, the bamboo worked piece was rotated.  
 There were 5 positions (angles) for the bamboo: 0, -7.5, -15, +7.5 and +15°.  
@@ -92,9 +92,9 @@ The knit directory for this script is the project directory.
 library(grateful)
 library(knitr)
 library(R.utils)
-library(readODS)
 library(rmarkdown)
 library(tidyverse)
+library(writexl)
 ```
 
 
@@ -300,8 +300,22 @@ head(final_data)
 
 
 # Save data
+## As XLSX
 ```{r}
-write_ods(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.ods"))
+write_xlsx(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.xlsx"))
+```
+
+Unfortunately, Git/GitHub/RStudio had issues pushing large ODS files created with `readODS::write_ods()`.
+
+## As Rbin
+```{r}
+saveObject(final_data, file = paste0(dir_out, "/ISEA_use-wear_Smarttester.Rbin"))
+```
+
+Rbin files (e.g. `ISEA_use-wear_Smarttester.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
+```{r, eval = FALSE}
+library(R.utils)
+rbin_data <- loadObject("ISEA_use-wear_Smarttester.Rbin")
 ```
 
 

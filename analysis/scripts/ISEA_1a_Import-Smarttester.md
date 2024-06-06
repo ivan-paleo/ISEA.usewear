@@ -1,7 +1,7 @@
 Import dataset from Smarttester’s sensors for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-03 17:29:15 CEST
+2024-06-06 12:06:48 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -13,6 +13,8 @@ Ivan Calandra
     rows](#reorder-columns-and-renumber-rows)
   - [Check result](#check-result)
 - [Save data](#save-data)
+  - [As XLSX](#as-xlsx)
+  - [As Rbin](#as-rbin)
 - [sessionInfo()](#sessioninfo)
 - [Cite R packages used](#cite-r-packages-used)
   - [References](#references)
@@ -30,8 +32,8 @@ The script will:
 1.  Read in the original TXT-files  
 2.  Format and merge the data for each sample
 3.  Combines the data from the 12 samples into one file  
-4.  Write an ODS file and save an R object ready for further analysis in
-    R
+4.  Write an XLSX file and save an R object ready for further analysis
+    in R
 
 For each sample, each TXT file represents 10 back-and-fourth movements
 (= 20 strokes) for a given sensor. After 20 strokes, the bamboo worked
@@ -121,9 +123,9 @@ The knit directory for this script is the project directory.
 library(grateful)
 library(knitr)
 library(R.utils)
-library(readODS)
 library(rmarkdown)
 library(tidyverse)
+library(writexl)
 ```
 
 ------------------------------------------------------------------------
@@ -519,8 +521,27 @@ head(final_data)
 
 # Save data
 
+## As XLSX
+
 ``` r
-write_ods(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.ods"))
+write_xlsx(final_data, path = paste0(dir_out, "/ISEA_use-wear_Smarttester.xlsx"))
+```
+
+Unfortunately, Git/GitHub/RStudio had issues pushing large ODS files
+created with `readODS::write_ods()`.
+
+## As Rbin
+
+``` r
+saveObject(final_data, file = paste0(dir_out, "/ISEA_use-wear_Smarttester.Rbin"))
+```
+
+Rbin files (e.g. `ISEA_use-wear_Smarttester.Rbin`) can be easily read
+into an R object (e.g. `rbin_data`) using the following code:
+
+``` r
+library(R.utils)
+rbin_data <- loadObject("ISEA_use-wear_Smarttester.Rbin")
 ```
 
 ------------------------------------------------------------------------
@@ -552,23 +573,23 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base     
 
     other attached packages:
-     [1] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
-     [5] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
-     [9] ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27    readODS_2.3.0    
+     [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
+     [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
+     [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27   
     [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
     [17] grateful_0.2.7   
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    zip_2.3.1        
-     [5] tidyselect_1.2.1  jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8       
-     [9] fastmap_1.2.0     R6_2.5.1          generics_0.1.3    munsell_0.5.1    
-    [13] rprojroot_2.0.4   tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0     
-    [17] rlang_1.1.3       utf8_1.2.4        stringi_1.8.4     cachem_1.1.0     
-    [21] xfun_0.44         sass_0.4.9        timechange_0.3.0  cli_3.6.2        
-    [25] withr_3.0.0       magrittr_2.0.3    digest_0.6.35     grid_4.4.0       
-    [29] rstudioapi_0.16.0 hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
-    [33] evaluate_0.23     glue_1.7.0        fansi_1.0.6       colorspace_2.1-0 
-    [37] tools_4.4.0       pkgconfig_2.0.3   htmltools_0.5.8.1
+     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    tidyselect_1.2.1 
+     [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.2.0    
+     [9] R6_2.5.1          generics_0.1.3    munsell_0.5.1     rprojroot_2.0.4  
+    [13] tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0      rlang_1.1.3      
+    [17] utf8_1.2.4        stringi_1.8.4     cachem_1.1.0      xfun_0.44        
+    [21] sass_0.4.9        timechange_0.3.0  cli_3.6.2         withr_3.0.0      
+    [25] magrittr_2.0.3    digest_0.6.35     grid_4.4.0        rstudioapi_0.16.0
+    [29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23    
+    [33] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  tools_4.4.0      
+    [37] pkgconfig_2.0.3   htmltools_0.5.8.1
 
 ------------------------------------------------------------------------
 
@@ -582,9 +603,9 @@ sessionInfo()
 | R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
 | R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
 | R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
-| readODS     | 2.3.0        | Schutten et al. (2024)                                                                        |
 | rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
 | tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
+| writexl     | 1.5.0        | Ooms (2024)                                                                                   |
 | RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
 
 ## References
@@ -632,6 +653,14 @@ Utilities*. <https://CRAN.R-project.org/package=R.utils>.
 
 </div>
 
+<div id="ref-writexl" class="csl-entry">
+
+Ooms, Jeroen. 2024. *<span class="nocase">writexl</span>: Export Data
+Frames to Excel “<span class="nocase">xlsx</span>” Format*.
+<https://CRAN.R-project.org/package=writexl>.
+
+</div>
+
 <div id="ref-rstudio" class="csl-entry">
 
 Posit team. 2024. *RStudio: Integrated Development Environment for r*.
@@ -652,14 +681,6 @@ Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
 *<span class="nocase">grateful</span>: Facilitate Citation of r
 Packages*. <https://pakillo.github.io/grateful/>.
-
-</div>
-
-<div id="ref-readODS" class="csl-entry">
-
-Schutten, Gerrit-Jan, Chung-hong Chan, Peter Brohan, Detlef Steuer, and
-Thomas J. Leeper. 2024. *<span class="nocase">readODS</span>: Read and
-Write ODS Files*. <https://CRAN.R-project.org/package=readODS>.
 
 </div>
 
