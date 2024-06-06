@@ -36,11 +36,12 @@ The script will:
 
 ```{r}
 dir_in <- "analysis/raw_data/"
-dir_out <- "analysis/plots/"
+dir_data <- "analysis/derived_data/"
+dir_plots <- "analysis/plots/"
 ```
 
 Input CSV file file must be located in "`r paste0("./", dir_in)`".  
-Plots will be saved in "`r paste0("./", dir_out)`".
+Plots will be saved in "`r paste0("./", dir_plots)`". Datasets will be saved in "`r paste0("./", dir_data)`". 
 
 The knit directory for this script is the project directory.
 
@@ -78,12 +79,12 @@ head(weights)
 # Save data
 ## As XLSX
 ```{r}
-write_xlsx(weights, path = paste0(dir_out, "/ISEA_use-wear_weights.xlsx"))
+write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_weights.xlsx"))
 ```
 
 ## As Rbin
 ```{r}
-saveObject(weights, file = paste0(dir_out, "/ISEA_use-wear_weights.Rbin"))
+saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_weights.Rbin"))
 ```
 
 Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:

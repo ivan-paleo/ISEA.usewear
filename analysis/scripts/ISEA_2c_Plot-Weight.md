@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-06 13:07:16 CEST
+2024-06-06 13:10:08 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -28,11 +28,13 @@ The script will:
 
 ``` r
 dir_in <- "analysis/raw_data/"
-dir_out <- "analysis/plots/"
+dir_data <- "analysis/derived_data/"
+dir_plots <- "analysis/plots/"
 ```
 
 Input CSV file file must be located in “./analysis/raw_data/”.  
-Plots will be saved in “./analysis/plots/”.
+Plots will be saved in “./analysis/plots/”. Datasets will be saved in
+“./analysis/derived_data/”.
 
 The knit directory for this script is the project directory.
 
@@ -84,13 +86,13 @@ head(weights)
 ## As XLSX
 
 ``` r
-write_xlsx(weights, path = paste0(dir_out, "/ISEA_use-wear_weights.xlsx"))
+write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_weights.xlsx"))
 ```
 
 ## As Rbin
 
 ``` r
-saveObject(weights, file = paste0(dir_out, "/ISEA_use-wear_weights.Rbin"))
+saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_weights.Rbin"))
 ```
 
 Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into
