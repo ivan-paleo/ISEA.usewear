@@ -55,6 +55,7 @@ library(ggplot2)
 library(ggrepel)
 library(grateful)
 library(knitr)
+library(patchwork)
 library(R.utils)
 library(rmarkdown)
 library(tidyverse)
@@ -113,7 +114,7 @@ color_name <- grep("type", names(weights_long), value = TRUE)
 color_name_leg <- gsub("_", " ", color_name)
 ```
 
-## Plot weights
+## Absolute weights
 ```{r}
              # Define plot
 p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
@@ -126,30 +127,65 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], col
   
              # Add Sample ID to points at "before" state
              geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
-                             hjust = 1, nudge_x = -0.06, direction = "y", 
-                             min.segment.length = 0, segment.size = 0.2, seed = 123) +
+                             hjust = 1, nudge_x = -0.1, direction = "y", 
+                             min.segment.length = 0, segment.size = 0.3, seed = 123) +
    
              # Light theme
              theme_classic() +
-             theme(aspect.ratio = 1) +
   
-
-             scale_x_discrete(expand = expansion(add = c(0.5, 0.1))) +
+             # Reduce margins around the plot
+             scale_x_discrete(expand = expansion(add = c(0.9, 0.1))) +
   
              # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
              scale_color_brewer(palette = 'Set2') +
   
              # Remove xlab and use the clean name for the legend
              labs(x = NULL, color = color_name_leg)
+```
 
-# Print plot
-print(p_weights)
+## Weight differences
+In order to improve the readability of the weight changes, only the differences are plotted.  
+
+The difference is the weight after minus the weight before. Since all samples lost weight during the experiment, the absolute values are plotted in order to only show the magnitude of the difference.
+
+```{r}
+# Add column Weight_diff
+weights <- mutate(weights, Weight_diff = abs(`Weight_after_[mg]` - `Weight_before_[mg]`))
+
+          # Define plot
+p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = .data[[color_name]])) +
+          
+          # Add points
+          geom_point(size = 3) +
+  
+          # Add Sample ID to points at "before" state
+          geom_text_repel(aes(label = Sample), show.legend = FALSE, hjust = 1, nudge_x = -0.1, 
+                          direction = "y", min.segment.length = 0, segment.size = 0.3, seed = 123) +
+  
+          # Light theme
+          theme_classic() +
+  
+          # Reduce margins around the plot
+          scale_x_discrete(expand = expansion(add = c(0.7, 0.05))) +
+  
+          # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+          scale_color_brewer(palette = 'Set2') +
+  
+          # Remove xlab and use the clean name for the legend
+          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg)
+```
+
+## Combine and plot plots
+```{r}
+p_all <- p_weights + p_diff + plot_layout(guides = 'collect')
+plot(p_all)
 ```
 
 ## Save plot
 ```{r}
-ggsave(paste0(dir_plots, "/plot_weights.pdf"), width = 120, height = 90, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/plot_weights.pdf"), width = 190, unit = "mm")
 ```
+
 
 ---
 

@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-10 12:21:41 CEST
+2024-06-10 15:38:18 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -14,7 +14,9 @@ Ivan Calandra
     plotting](#pivot-to-long-format-for-plotting)
   - [Format column names for nice
     plotting](#format-column-names-for-nice-plotting)
-  - [Plot weights](#plot-weights)
+  - [Absolute weights](#absolute-weights)
+  - [Weight differences](#weight-differences)
+  - [Combine and plot plots](#combine-and-plot-plots)
   - [Save plot](#save-plot)
 - [sessionInfo()](#sessioninfo)
 - [Cite R packages used](#cite-r-packages-used)
@@ -53,6 +55,7 @@ library(ggplot2)
 library(ggrepel)
 library(grateful)
 library(knitr)
+library(patchwork)
 library(R.utils)
 library(rmarkdown)
 library(tidyverse)
@@ -132,7 +135,7 @@ color_name <- grep("type", names(weights_long), value = TRUE)
 color_name_leg <- gsub("_", " ", color_name)
 ```
 
-## Plot weights
+## Absolute weights
 
 ``` r
              # Define plot
@@ -146,32 +149,71 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], col
   
              # Add Sample ID to points at "before" state
              geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
-                             hjust = 1, nudge_x = -0.06, direction = "y", 
-                             min.segment.length = 0, segment.size = 0.2, seed = 123) +
+                             hjust = 1, nudge_x = -0.1, direction = "y", 
+                             min.segment.length = 0, segment.size = 0.3, seed = 123) +
    
              # Light theme
              theme_classic() +
-             theme(aspect.ratio = 1) +
   
-
-             scale_x_discrete(expand = expansion(add = c(0.5, 0.1))) +
+             # Reduce margins around the plot
+             scale_x_discrete(expand = expansion(add = c(0.9, 0.1))) +
   
              # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
              scale_color_brewer(palette = 'Set2') +
   
              # Remove xlab and use the clean name for the legend
              labs(x = NULL, color = color_name_leg)
-
-# Print plot
-print(p_weights)
 ```
 
-![](ISEA_2c_Plot-Weight_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+## Weight differences
+
+In order to improve the readability of the weight changes, only the
+differences are plotted.
+
+The difference is the weight after minus the weight before. Since all
+samples lost weight during the experiment, the absolute values are
+plotted in order to only show the magnitude of the difference.
+
+``` r
+# Add column Weight_diff
+weights <- mutate(weights, Weight_diff = abs(`Weight_after_[mg]` - `Weight_before_[mg]`))
+
+          # Define plot
+p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = .data[[color_name]])) +
+          
+          # Add points
+          geom_point(size = 3) +
+  
+          # Add Sample ID to points at "before" state
+          geom_text_repel(aes(label = Sample), show.legend = FALSE, hjust = 1, nudge_x = -0.1, 
+                          direction = "y", min.segment.length = 0, segment.size = 0.3, seed = 123) +
+  
+          # Light theme
+          theme_classic() +
+  
+          # Reduce margins around the plot
+          scale_x_discrete(expand = expansion(add = c(0.7, 0.05))) +
+  
+          # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+          scale_color_brewer(palette = 'Set2') +
+  
+          # Remove xlab and use the clean name for the legend
+          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg)
+```
+
+## Combine and plot plots
+
+``` r
+p_all <- p_weights + p_diff + plot_layout(guides = 'collect')
+plot(p_all)
+```
+
+![](ISEA_2c_Plot-Weight_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## Save plot
 
 ``` r
-ggsave(paste0(dir_plots, "/plot_weights.pdf"), width = 120, height = 90, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/plot_weights.pdf"), width = 190, unit = "mm")
 ```
 
 ------------------------------------------------------------------------
@@ -206,8 +248,8 @@ sessionInfo()
      [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
      [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
-    [13] R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47        grateful_0.2.7   
-    [17] ggrepel_0.9.5     ggplot2_3.5.1    
+    [13] R.oo_1.26.0       R.methodsS3_1.8.2 patchwork_1.2.0   knitr_1.47       
+    [17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1    
 
     loaded via a namespace (and not attached):
      [1] sass_0.4.9         utf8_1.2.4         generics_0.1.3     stringi_1.8.4     
@@ -233,6 +275,7 @@ sessionInfo()
 | ggrepel     | 0.9.5        | Slowikowski (2024)                                                                            |
 | grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
+| patchwork   | 1.2.0        | Pedersen (2024)                                                                               |
 | R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
 | R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
 | R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
@@ -291,6 +334,13 @@ Utilities*. <https://CRAN.R-project.org/package=R.utils>.
 Ooms, Jeroen. 2024. *<span class="nocase">writexl</span>: Export Data
 Frames to Excel “<span class="nocase">xlsx</span>” Format*.
 <https://CRAN.R-project.org/package=writexl>.
+
+</div>
+
+<div id="ref-patchwork" class="csl-entry">
+
+Pedersen, Thomas Lin. 2024. *<span class="nocase">patchwork</span>: The
+Composer of Plots*. <https://CRAN.R-project.org/package=patchwork>.
 
 </div>
 
