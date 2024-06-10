@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-06 13:10:08 CEST
+2024-06-10 12:21:41 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -10,6 +10,12 @@ Ivan Calandra
   - [As XLSX](#as-xlsx)
   - [As Rbin](#as-rbin)
 - [Plot](#plot)
+  - [Pivot to long format for
+    plotting](#pivot-to-long-format-for-plotting)
+  - [Format column names for nice
+    plotting](#format-column-names-for-nice-plotting)
+  - [Plot weights](#plot-weights)
+  - [Save plot](#save-plot)
 - [sessionInfo()](#sessioninfo)
 - [Cite R packages used](#cite-r-packages-used)
   - [References](#references)
@@ -44,6 +50,7 @@ The knit directory for this script is the project directory.
 
 ``` r
 library(ggplot2)
+library(ggrepel)
 library(grateful)
 library(knitr)
 library(R.utils)
@@ -62,8 +69,10 @@ weights <- read.csv(file_in, check.names = FALSE)
 str(weights)
 ```
 
-    'data.frame':   12 obs. of  3 variables:
-     $ Tool              : chr  "ISEA-Chert-A1" "ISEA-Chert-B1" "ISEA-Chert-A2" "ISEA-Chert-B2" ...
+    'data.frame':   12 obs. of  5 variables:
+     $ Sample            : chr  "ISEA-EX1" "ISEA-EX2" "ISEA-EX3" "ISEA-EX4" ...
+     $ Chert_type        : chr  "A" "B" "A" "B" ...
+     $ Chert_tool        : int  1 1 2 2 3 3 4 4 5 5 ...
      $ Weight_before_[mg]: num  30.1 21.5 28.6 16.7 16.7 ...
      $ Weight_after_[mg] : num  30 21.5 28.6 16.7 16.7 ...
 
@@ -71,13 +80,13 @@ str(weights)
 head(weights)
 ```
 
-               Tool Weight_before_[mg] Weight_after_[mg]
-    1 ISEA-Chert-A1              30.07             30.00
-    2 ISEA-Chert-B1              21.52             21.50
-    3 ISEA-Chert-A2              28.65             28.62
-    4 ISEA-Chert-B2              16.69             16.67
-    5 ISEA-Chert-A3              16.69             16.66
-    6 ISEA-Chert-B3              10.25             10.04
+        Sample Chert_type Chert_tool Weight_before_[mg] Weight_after_[mg]
+    1 ISEA-EX1          A          1              30.07             30.00
+    2 ISEA-EX2          B          1              21.52             21.50
+    3 ISEA-EX3          A          2              28.65             28.62
+    4 ISEA-EX4          B          2              16.69             16.67
+    5 ISEA-EX5          A          3              16.69             16.66
+    6 ISEA-EX6          B          3              10.25             10.04
 
 ------------------------------------------------------------------------
 
@@ -106,6 +115,64 @@ rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
 ------------------------------------------------------------------------
 
 # Plot
+
+## Pivot to long format for plotting
+
+``` r
+weights_long <-  weights %>% 
+                 pivot_longer(contains("Weight"), names_to = "State_full", values_to = "Weight [mg]") %>% 
+                 mutate(State = factor(gsub("Weight_|_\\[mg\\]", "", State_full), 
+                                       levels = c("before", "after")))
+```
+
+## Format column names for nice plotting
+
+``` r
+color_name <- grep("type", names(weights_long), value = TRUE)
+color_name_leg <- gsub("_", " ", color_name)
+```
+
+## Plot weights
+
+``` r
+             # Define plot
+p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
+             
+             # Add points
+             geom_point(size = 3) +
+  
+             # Add lines to connect points with identical"Sample ID
+             geom_line(linewidth = 1, aes(group = Sample), show.legend = FALSE) +
+  
+             # Add Sample ID to points at "before" state
+             geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
+                             hjust = 1, nudge_x = -0.06, direction = "y", 
+                             min.segment.length = 0, segment.size = 0.2, seed = 123) +
+   
+             # Light theme
+             theme_classic() +
+             theme(aspect.ratio = 1) +
+  
+
+             scale_x_discrete(expand = expansion(add = c(0.5, 0.1))) +
+  
+             # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+             scale_color_brewer(palette = 'Set2') +
+  
+             # Remove xlab and use the clean name for the legend
+             labs(x = NULL, color = color_name_leg)
+
+# Print plot
+print(p_weights)
+```
+
+![](ISEA_2c_Plot-Weight_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+## Save plot
+
+``` r
+ggsave(paste0(dir_plots, "/plot_weights.pdf"), width = 120, height = 90, unit = "mm")
+```
 
 ------------------------------------------------------------------------
 
@@ -140,19 +207,21 @@ sessionInfo()
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
      [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
     [13] R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47        grateful_0.2.7   
-    [17] ggplot2_3.5.1    
+    [17] ggrepel_0.9.5     ggplot2_3.5.1    
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    tidyselect_1.2.1 
-     [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.2.0    
-     [9] R6_2.5.1          generics_0.1.3    munsell_0.5.1     rprojroot_2.0.4  
-    [13] tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0      rlang_1.1.3      
-    [17] utf8_1.2.4        stringi_1.8.4     cachem_1.1.0      xfun_0.44        
-    [21] sass_0.4.9        timechange_0.3.0  cli_3.6.2         withr_3.0.0      
-    [25] magrittr_2.0.3    digest_0.6.35     grid_4.4.0        rstudioapi_0.16.0
-    [29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23    
-    [33] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  tools_4.4.0      
-    [37] pkgconfig_2.0.3   htmltools_0.5.8.1
+     [1] sass_0.4.9         utf8_1.2.4         generics_0.1.3     stringi_1.8.4     
+     [5] hms_1.1.3          digest_0.6.35      magrittr_2.0.3     RColorBrewer_1.1-3
+     [9] evaluate_0.23      grid_4.4.0         timechange_0.3.0   fastmap_1.2.0     
+    [13] rprojroot_2.0.4    jsonlite_1.8.8     fansi_1.0.6        scales_1.3.0      
+    [17] textshaping_0.4.0  jquerylib_0.1.4    cli_3.6.2          rlang_1.1.4       
+    [21] munsell_0.5.1      withr_3.0.0        cachem_1.1.0       yaml_2.3.8        
+    [25] tools_4.4.0        tzdb_0.4.0         colorspace_2.1-0   vctrs_0.6.5       
+    [29] R6_2.5.1           lifecycle_1.0.4    ragg_1.3.2         pkgconfig_2.0.3   
+    [33] pillar_1.9.0       bslib_0.7.0        gtable_0.3.5       glue_1.7.0        
+    [37] Rcpp_1.0.12        systemfonts_1.1.0  highr_0.11         xfun_0.44         
+    [41] tidyselect_1.2.1   rstudioapi_0.16.0  farver_2.1.2       htmltools_0.5.8.1 
+    [45] labeling_0.4.3     compiler_4.4.0    
 
 ------------------------------------------------------------------------
 
@@ -161,6 +230,7 @@ sessionInfo()
 | Package     | Version      | Citation                                                                                      |
 |:------------|:-------------|:----------------------------------------------------------------------------------------------|
 | base        | 4.4.0        | R Core Team (2024)                                                                            |
+| ggrepel     | 0.9.5        | Slowikowski (2024)                                                                            |
 | grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
 | R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
@@ -244,6 +314,15 @@ Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
 *<span class="nocase">grateful</span>: Facilitate Citation of r
 Packages*. <https://pakillo.github.io/grateful/>.
+
+</div>
+
+<div id="ref-ggrepel" class="csl-entry">
+
+Slowikowski, Kamil. 2024. *<span class="nocase">ggrepel</span>:
+Automatically Position Non-Overlapping Text Labels with
+“<span class="nocase">ggplot2</span>”*.
+<https://CRAN.R-project.org/package=ggrepel>.
 
 </div>
 

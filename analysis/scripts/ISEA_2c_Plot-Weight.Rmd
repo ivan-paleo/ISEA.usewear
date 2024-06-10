@@ -52,6 +52,7 @@ The knit directory for this script is the project directory.
 # Load packages
 ```{r}
 library(ggplot2)
+library(ggrepel)
 library(grateful)
 library(knitr)
 library(R.utils)
@@ -98,7 +99,57 @@ rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
 
 
 # Plot
+## Pivot to long format for plotting
+```{r}
+weights_long <-  weights %>% 
+                 pivot_longer(contains("Weight"), names_to = "State_full", values_to = "Weight [mg]") %>% 
+                 mutate(State = factor(gsub("Weight_|_\\[mg\\]", "", State_full), 
+                                       levels = c("before", "after")))
+```
 
+## Format column names for nice plotting
+```{r}
+color_name <- grep("type", names(weights_long), value = TRUE)
+color_name_leg <- gsub("_", " ", color_name)
+```
+
+## Plot weights
+```{r}
+             # Define plot
+p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
+             
+             # Add points
+             geom_point(size = 3) +
+  
+             # Add lines to connect points with identical"Sample ID
+             geom_line(linewidth = 1, aes(group = Sample), show.legend = FALSE) +
+  
+             # Add Sample ID to points at "before" state
+             geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
+                             hjust = 1, nudge_x = -0.06, direction = "y", 
+                             min.segment.length = 0, segment.size = 0.2, seed = 123) +
+   
+             # Light theme
+             theme_classic() +
+             theme(aspect.ratio = 1) +
+  
+
+             scale_x_discrete(expand = expansion(add = c(0.5, 0.1))) +
+  
+             # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+             scale_color_brewer(palette = 'Set2') +
+  
+             # Remove xlab and use the clean name for the legend
+             labs(x = NULL, color = color_name_leg)
+
+# Print plot
+print(p_weights)
+```
+
+## Save plot
+```{r}
+ggsave(paste0(dir_plots, "/plot_weights.pdf"), width = 120, height = 90, unit = "mm")
+```
 
 ---
 
