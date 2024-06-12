@@ -1,0 +1,153 @@
+---
+title: "Plot Smarttester's sensor data for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_2a_Plot-Smarttester.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+# Goal of the script
+This script plots the sensors data from the Smarttester.  
+
+
+```{r}
+dir_in <- "analysis/derived_data/"
+dir_plots <- "analysis/plots/"
+```
+
+Input CSV file file must be located in "`r paste0("./", dir_in)`".  
+Plots will be saved in "`r paste0("./", dir_plots)`". 
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(ggplot2)
+library(grateful)
+library(knitr)
+library(R.utils)
+library(rmarkdown)
+library(tidyverse)
+```
+
+
+---
+
+
+# Read in CSV file
+```{r}
+ST_file <- list.files(dir_in, pattern = "Smarttester\\.Rbin$", full.names = TRUE)
+ST_data <- loadObject(ST_file)
+str(ST_data)
+head(ST_data)
+```
+
+
+---
+
+
+# Plot
+
+## Define variables
+Define dependent (numeric) variables to plot on the Y axis
+
+```{r}
+ST_y <- c("X_velocity [mm/s]", "Depth [mm]", "Angle [°]", "Torque [Nm]")
+```
+
+
+## Subset and prepare data for plots
+For readability, only every 20th stroke will be plotted. The first 50 strokes will also be plotted separately.
+
+### Every 20th strokes
+```{r}
+# Create a sequence of every 20th strokes, including first and last strokes
+stroke_20 <- seq(1, 2000, by = 20) %>% 
+             c(max(ST_data$StrokeNr)) 
+
+# Extract data for these strokes
+data_every20 <- filter(ST_data, StrokeNr %in% stroke_20) %>% 
+
+                # Pivot to longer format for facet plots
+                pivot_longer(all_of(ST_y), names_to = "parameter", values_to = "value") %>% 
+  
+                # Convert to data.frame
+                as.data.frame()
+
+# Check result
+str(data_every20)
+head(data_every20)
+```
+
+### First 50 strokes
+```{r}
+# Extract data for the first 50 strokes
+data_1to50 <- filter(ST_data, StrokeNr %in% 1:50) %>% 
+
+              # Pivot to longer format for facet plots
+              pivot_longer(all_of(ST_y), names_to = "parameter", values_to = "value") %>% 
+  
+              # Convert to data.frame
+              as.data.frame()
+
+# Check result
+str(data_1to50)
+head(data_1to50)
+```
+
+
+## Plots
+```{r}
+
+```
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_2a_Plot-Smarttester")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
+
