@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-10 15:38:18 CEST
+2024-06-17 10:16:25 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -213,7 +213,7 @@ plot(p_all)
 ## Save plot
 
 ``` r
-ggsave(plot = p_all, paste0(dir_plots, "/plot_weights.pdf"), width = 190, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_plot-weights.pdf"), width = 190, unit = "mm")
 ```
 
 ------------------------------------------------------------------------

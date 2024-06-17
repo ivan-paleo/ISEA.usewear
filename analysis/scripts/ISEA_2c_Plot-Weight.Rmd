@@ -183,7 +183,7 @@ plot(p_all)
 
 ## Save plot
 ```{r}
-ggsave(plot = p_all, paste0(dir_plots, "/plot_weights.pdf"), width = 190, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_plot-weights.pdf"), width = 190, unit = "mm")
 ```
 
 
