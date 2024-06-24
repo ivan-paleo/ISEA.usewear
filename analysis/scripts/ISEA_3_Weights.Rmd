@@ -1,0 +1,214 @@
+---
+title: "Plot tools' weights dataset for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_3_Weights.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+# Goal of the script
+This script imports and plots the tools' weights before and after the experiments.  
+The script will:
+
+1. Read in the original CSV-file  
+2. Save data as Rbin and XLSX  
+3. Plot 
+
+```{r}
+dir_in <- "analysis/raw_data/"
+dir_data <- "analysis/derived_data/"
+dir_plots <- "analysis/plots/"
+```
+
+Input CSV file file must be located in "`r paste0("./", dir_in)`".  
+Plots will be saved in "`r paste0("./", dir_plots)`". Datasets will be saved in "`r paste0("./", dir_data)`". 
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(grateful)
+library(knitr)
+library(patchwork)
+library(R.utils)
+library(rmarkdown)
+library(tidyverse)
+library(writexl)
+```
+
+
+---
+
+
+# Read in CSV file
+```{r}
+file_in <- list.files(dir_in, pattern = "weight\\.csv$", full.names = TRUE)
+weights <- read.csv(file_in, check.names = FALSE)
+str(weights)
+head(weights)
+```
+
+
+---
+
+
+# Save data
+## As XLSX
+```{r}
+write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_weights.xlsx"))
+```
+
+## As Rbin
+```{r}
+saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_weights.Rbin"))
+```
+
+Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
+```{r, eval = FALSE}
+library(R.utils)
+rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
+```
+
+
+---
+
+
+# Plot
+## Pivot to long format for plotting
+```{r}
+weights_long <-  weights %>% 
+                 pivot_longer(contains("Weight"), names_to = "State_full", values_to = "Weight [mg]") %>% 
+                 mutate(State = factor(gsub("Weight_|_\\[mg\\]", "", State_full), 
+                                       levels = c("before", "after")))
+```
+
+## Format column names for nice plotting
+```{r}
+color_name <- grep("type", names(weights_long), value = TRUE)
+color_name_leg <- gsub("_", " ", color_name)
+```
+
+## Absolute weights
+```{r}
+             # Define plot
+p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
+             
+             # Add points
+             geom_point(size = 3) +
+  
+             # Add lines to connect points with identical"Sample ID
+             geom_line(linewidth = 1, aes(group = Sample), show.legend = FALSE) +
+  
+             # Add Sample ID to points at "before" state
+             geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
+                             hjust = 1, nudge_x = -0.1, direction = "y", 
+                             min.segment.length = 0, segment.size = 0.3, seed = 123) +
+   
+             # Light theme
+             theme_classic() +
+  
+             # Reduce margins around the plot
+             scale_x_discrete(expand = expansion(add = c(0.9, 0.1))) +
+  
+             # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+             scale_color_brewer(palette = 'Set2') +
+  
+             # Remove xlab and use the clean name for the legend
+             labs(x = NULL, color = color_name_leg)
+```
+
+## Weight differences
+In order to improve the readability of the weight changes, only the differences are plotted.  
+
+The difference is the weight after minus the weight before. Since all samples lost weight during the experiment, the absolute values are plotted in order to only show the magnitude of the difference.
+
+```{r}
+# Add column Weight_diff
+weights <- mutate(weights, Weight_diff = abs(`Weight_after_[mg]` - `Weight_before_[mg]`))
+
+          # Define plot
+p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = .data[[color_name]])) +
+          
+          # Add points
+          geom_point(size = 3) +
+  
+          # Add Sample ID to points at "before" state
+          geom_text_repel(aes(label = Sample), show.legend = FALSE, hjust = 1, nudge_x = -0.1, 
+                          direction = "y", min.segment.length = 0, segment.size = 0.3, seed = 123) +
+  
+          # Light theme
+          theme_classic() +
+  
+          # Reduce margins around the plot
+          scale_x_discrete(expand = expansion(add = c(0.7, 0.05))) +
+  
+          # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+          scale_color_brewer(palette = 'Set2') +
+  
+          # Remove xlab and use the clean name for the legend
+          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg)
+```
+
+## Combine and plot plots
+```{r}
+p_all <- p_weights + p_diff + plot_layout(guides = 'collect')
+plot(p_all)
+```
+
+## Save plot
+```{r}
+ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_plot-weights.pdf"), width = 190, unit = "mm")
+```
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_3_Weights")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
+

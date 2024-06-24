@@ -1,0 +1,283 @@
+---
+title: "Import dataset from the surface texture analysis for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_2a_STA-import.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+
+# Goal of the script
+This script formats the output of the resulting files from applying surface texture analysis to a sample of experimental lithics.
+The script will:
+
+1. Read in the original files  
+2. Format the data  
+3. Write XLSX file and save R objects ready for further analysis in R  
+
+```{r}
+dir_in  <- "analysis/raw_data"
+dir_out <- "analysis/derived_data"
+```
+
+Raw data must be located in "`r paste0("./", dir_in)`".  
+Formatted data will be saved in "`r paste0("./", dir_out)`".
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(grateful)
+library(knitr)
+library(R.utils)
+library(rmarkdown)
+library(tidyverse)
+library(writexl)
+```
+
+
+---
+
+
+# Read and format data
+## Read in CSV file
+```{r}
+# Loop through list of CSV files and read in
+STA <- list.files(dir_in, pattern = "STA\\.csv$", full.names = TRUE) %>% 
+       read.csv(header = FALSE, na.strings = "*****", fileEncoding = 'WINDOWS-1252')
+```
+
+
+## Select relevant columns and rows
+```{r}
+STA_keep_col  <- c(3, 11:46)                               # Define columns to keep
+STA_keep_rows <- which(STA[[1]] != "#")                    # Define rows to keep
+STA_keep      <- STA[STA_keep_rows, STA_keep_col] # Subset rows and columns
+```
+
+
+## Identify results using frame numbers
+```{r}
+frames <- as.numeric(unlist(STA[1, STA_keep_col]))
+ID <- which(frames == 26)
+ISO <- which(frames == 28)
+furrow <- which(frames == 29)
+diriso <- which(frames %in% 30:31)
+SSFA <- which(frames %in% 32:33)
+```
+
+
+## Add headers
+```{r}
+# Get headers from 2nd row
+colnames(STA_keep) <- STA[2, STA_keep_col] %>% 
+  
+                      # Convert to valid names
+                      make.names() %>% 
+  
+                      # Delete repeated periods
+                      gsub("\\.+", "\\.", x = .) %>% 
+  
+                      # Delete periods at the end of the names
+                      gsub("\\.$", "", x = .)
+  
+# Keep parameter name before the first period for ISO
+colnames(STA_keep)[ISO] <- strsplit(names(STA_keep)[ISO], ".", fixed = TRUE) %>% 
+                           sapply(`[[`, 1)
+
+# Keep parameter name after the last period for SSFA
+colnames(STA_keep)[SSFA] <- gsub("^([A-Za-z0-9]+\\.)+", "", colnames(STA_keep)[SSFA])
+
+# Edit header non-measured point ratios
+colnames(STA_keep)[ID] <- "NMP"
+
+# Edit header for name of surfaces
+colnames(STA_keep)[1] <- "Name"
+
+# Check results
+str(STA_keep)
+head(STA_keep)
+```
+
+
+## Extract units
+```{r}
+# Filter out rows which contains units
+n_units <- filter(STA, V4 == "<no unit>") %>% 
+          
+           # Keep only unique/distinct rows of units
+           distinct() %>% 
+  
+           # Number of unique/distinct rows of units
+           nrow()
+
+if (n_units != 1) {
+  stop("The different datasets have different units")
+} else {
+  # Extract unit line from 3rd row for considered columns
+  STA_units <- unlist(STA[3, STA_keep_col[-1]])
+
+  # Get names associated to the units
+  names(STA_units) <- colnames(STA_keep)[-1]
+
+  # Combine into a data.frame for export
+  units_table <- data.frame(variable = names(STA_units), units = STA_units)
+  row.names(units_table) <- NULL
+}
+
+# Check results
+units_table
+```
+
+
+## Split column 'Name' 
+```{r}
+STA_keep[c("Specimen", "Objective", "Side", "Location", "Strokes")] <- STA_keep$Name %>% 
+  
+                                                                       # Split by " --- " and keep 2nd element
+                                                                       str_split_i(" --- ", i = 2) %>% 
+                                                                       
+                                                                       # Delete ".mnt"
+                                                                       gsub(".mnt", "", .) %>% 
+   
+                                                                       # Split by "_" into a matrix with 7 cols
+                                                                       str_split_fixed("_", n = 7) %>% 
+  
+                                                                       # Keep all cols but cols 2 and 6
+                                                                       .[, -c(2, 6)]
+```
+
+
+## Split column 'Specimen' 
+```{r}
+STA_keep[c("Chert_type", "Chert_tool")] <- STA_keep$Specimen %>% 
+                                           
+                                           # Split by "-" and keep 3rd element   
+                                           str_split_i("-", i = 3) %>% 
+  
+                                           # Split after the first capital letter
+                                           str_split("(?<=[A-Z]{1})", simplify = TRUE)
+```
+
+
+## Add column with sample ID
+```{r}
+# Create a data.frame with correspondence between chert type, chert tool and sample ID
+sample_ID <- data.frame(Sample = paste0("ISEA-EX", 1:12), 
+                        Chert_type = rep(c("A", "B"), times = 6),
+                        Chert_tool = rep(1:6, each = 2))
+
+# Merge the data.frames by chert type and chert tool
+STA_keep_ID <- merge(STA_keep, sample_ID, by = c("Chert_type", "Chert_tool"))
+```
+
+
+## Keep only numerical parts in columns "Location" and "Strokes"
+```{r}
+STA_keep_ID$Location <- gsub("loc", "", STA_keep_ID$Location)
+STA_keep_ID$Strokes <- factor(gsub("strokes", "", STA_keep_ID$Strokes))
+```
+
+
+## Convert all parameter variables to numeric
+```{r}
+STA_keep_ID <- type_convert(STA_keep_ID)
+```
+
+
+## NMP ratios
+The summary statistics for NMP ratios are:  
+```{r, echo = FALSE}
+summary(STA_keep_ID[["NMP"]])
+```
+
+All seems good.
+
+
+## Re-order columns and add units as comment 
+```{r}
+STA_final <- select(STA_keep_ID, Sample, Chert_type, Chert_tool, Objective:Strokes, NMP:NewEplsar)
+comment(STA_final) <- STA_units
+```
+
+Type `comment(STA_final)` to check the units of the parameters.
+
+
+## Check the result
+```{r}
+str(STA_final)
+head(STA_final)
+```
+
+
+---
+
+
+# Save data
+## As XLSX
+```{r}
+write_xlsx(list("data" = STA_final, "units" = units_table), path = paste0(dir_out, "/ISEA_use-wear_STA.xlsx"))
+```
+
+
+## As Rbin
+```{r}
+saveObject(STA_final, file = paste0(dir_out, "/ISEA_use-wear_STA.Rbin"))
+```
+
+Rbin files (e.g. `ISEA_use-wear_STA.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
+```{r, eval = FALSE}
+library(R.utils)
+rbin_data <- loadObject("ISEA_use-wear_STA.Rbin")
+```
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_2a_STA-import")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
