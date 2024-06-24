@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 13:38:37 CEST
+2024-06-24 14:31:20 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -272,10 +272,22 @@ weights_sel <- select(weights, !Chert_tool)
 
 # Compute summary statistics based on Chert_type
 stats_chert <- summaryBy(. ~ Chert_type, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_chert[1:2]
+```
 
+      Chert_type Weight_before.n
+    1          A               6
+    2          B               6
+
+``` r
 # Compute summary statistics based on Bamboo_sp
 stats_bamboo <- summaryBy(. ~ Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_bamboo[1:2]
 ```
+
+               Bamboo_sp Weight_before.n
+    1   Bambusa blumeana               6
+    2 Schizostachum lima               6
 
 ## Save as XLSX
 

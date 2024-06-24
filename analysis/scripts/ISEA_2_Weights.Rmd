@@ -229,9 +229,11 @@ weights_sel <- select(weights, !Chert_tool)
 
 # Compute summary statistics based on Chert_type
 stats_chert <- summaryBy(. ~ Chert_type, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_chert[1:2]
 
 # Compute summary statistics based on Bamboo_sp
 stats_bamboo <- summaryBy(. ~ Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_bamboo[1:2]
 ```
 
 

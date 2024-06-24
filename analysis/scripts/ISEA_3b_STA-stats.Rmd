@@ -1,0 +1,159 @@
+---
+title: "Summary statistics on the surface texture parameters for the ISEA use-wear project"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 3
+    html_preview: false
+bibliography: ISEA_3b_STA-stats.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+
+# Goal of the script
+This script computes standard descriptive statistics for each group.  
+The groups are based on:
+
+* Chert type (A or B)  
+* Bamboo species (Bambusa blumeana or Schizostachum lima)  
+* Strokes (0 or 2000)
+
+It computes the following statistics:  
+
+* sample size (n = `length`)  
+* smallest value (`min`)  
+* largest value (`max`)
+* mean  
+* median  
+* standard deviation (`sd`)
+
+```{r}
+dir_in <- "analysis/derived_data"
+dir_stats <- "analysis/stats/"
+```
+
+Raw data must be located in "`r paste0("./", dir_in)`".  
+Summary statistics will be saved in "`r paste0("./", dir_stats)`".
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(doBy)
+library(grateful)
+library(knitr)
+library(R.utils)
+library(rmarkdown)
+library(tidyverse)
+library(writexl)
+```
+
+
+---
+
+
+# Read in data
+```{r}
+STA <- list.files(dir_in, pattern = "STA\\.Rbin$", full.names = TRUE) %>% 
+       loadObject()
+str(STA)
+head(STA)
+```
+
+
+---
+
+
+# Summary statistics
+
+## Create function to compute the statistics at once
+```{r}
+nminmaxmeanmedsd <- function(x){
+    y <- x[!is.na(x)]     # Exclude NAs
+    n_test <- length(y)   # Sample size (n)
+    min_test <- min(y)    # Minimum
+    max_test <- max(y)    # Maximum
+    mean_test <- mean(y)  # Mean
+    med_test <- median(y) # Median
+    sd_test <- sd(y)      # Standard deviation
+    out <- c(n_test, min_test, max_test, mean_test, med_test, sd_test) # Concatenate
+    names(out) <- c("n", "min", "max", "mean", "median", "sd")         # Name values
+    return(out)                                                        # Object to return
+}
+```
+
+
+## Compute summary statistics
+```{r}
+# Exclude Chert_tool and Location columns from data because they are numeric yet not relevant for stats
+STA_sel <- select(STA, !c(Chert_tool, Location))
+
+# Compute summary statistics based on Chert_type and Strokes
+stats_chert <- summaryBy(. ~ Chert_type + Strokes, data = STA_sel, FUN = nminmaxmeanmedsd)
+stats_chert[1:3]
+
+# Compute summary statistics based on Bamboo_sp and Strokes
+stats_bamboo <- summaryBy(. ~ Bamboo_sp + Strokes, data = STA_sel, FUN = nminmaxmeanmedsd)
+stats_bamboo[1:3]
+
+# Compute summary statistics based on Chert_type, Bamboo_sp and Strokes
+stats_chert_bamboo <- summaryBy(. ~ Chert_type + Bamboo_sp + Strokes, 
+                                data = STA_sel, FUN = nminmaxmeanmedsd)
+stats_chert_bamboo[1:4]
+```
+
+
+## Save as XLSX
+```{r}
+write_xlsx(list("Chert+Strokes" = stats_chert, "Bamboo+Strokes" = stats_bamboo, 
+                "Chert+Bamboo+Strokes" = stats_chert_bamboo), 
+           path = paste0(dir_stats, "/ISEA_use-wear_STA-stats.xlsx"))
+```
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_3b_STA-stats")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+
