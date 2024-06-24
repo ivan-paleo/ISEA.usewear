@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 12:33:28 CEST
+2024-06-24 13:38:37 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -232,7 +232,7 @@ p_all <- p_weights + p_diff + plot_layout(guides = 'collect')
 plot(p_all)
 ```
 
-![](ISEA_3_Weights_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](ISEA_2_Weights_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ## Save plot
 

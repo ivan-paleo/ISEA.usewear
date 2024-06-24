@@ -14,7 +14,7 @@ output:
     toc: true
     toc_depth: 3
     html_preview: false
-bibliography: ISEA_3_Weights.bib
+bibliography: ISEA_2_Weights.bib
 knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
 ---
@@ -259,7 +259,7 @@ sessionInfo()
 
 ```{r, echo = FALSE}
 pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
-                           out.dir = "analysis/scripts", bib.file = "ISEA_3_Weights")
+                           out.dir = "analysis/scripts", bib.file = "ISEA_2_Weights")
 knitr::kable(pkgs_cite)
 ```
 

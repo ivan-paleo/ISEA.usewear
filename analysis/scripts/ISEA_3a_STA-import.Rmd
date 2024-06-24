@@ -14,7 +14,7 @@ output:
     toc: true
     toc_depth: 3
     html_preview: false
-bibliography: ISEA_2a_STA-import.bib
+bibliography: ISEA_3a_STA-import.bib
 knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
 ---
@@ -185,35 +185,33 @@ STA_keep[c("Chert_type", "Chert_tool")] <- STA_keep$Specimen %>%
 ```
 
 
-## Add column with sample ID
+## Add columns with sample ID and bamboo species
 ```{r}
-# Create a data.frame with correspondence between chert type, chert tool and sample ID
-sample_ID <- data.frame(Sample = paste0("ISEA-EX", 1:12), 
-                        Chert_type = rep(c("A", "B"), times = 6),
-                        Chert_tool = rep(1:6, each = 2))
+# Load Weights dataset
+weights <- loadObject(paste0(dir_out, "/ISEA_use-wear_Weights.Rbin"))
 
 # Merge the data.frames by chert type and chert tool
-STA_keep_ID <- merge(STA_keep, sample_ID, by = c("Chert_type", "Chert_tool"))
+STA_keep_ID_bamb <- merge(STA_keep, weights[1:4], by = c("Chert_type", "Chert_tool"))
 ```
 
 
 ## Keep only numerical parts in columns "Location" and "Strokes"
 ```{r}
-STA_keep_ID$Location <- gsub("loc", "", STA_keep_ID$Location)
-STA_keep_ID$Strokes <- factor(gsub("strokes", "", STA_keep_ID$Strokes))
+STA_keep_ID_bamb$Location <- gsub("loc", "", STA_keep_ID_bamb$Location)
+STA_keep_ID_bamb$Strokes <- factor(gsub("strokes", "", STA_keep_ID_bamb$Strokes))
 ```
 
 
 ## Convert all parameter variables to numeric
 ```{r}
-STA_keep_ID <- type_convert(STA_keep_ID)
+STA_keep_ID_bamb <- type_convert(STA_keep_ID_bamb)
 ```
 
 
 ## NMP ratios
 The summary statistics for NMP ratios are:  
 ```{r, echo = FALSE}
-summary(STA_keep_ID[["NMP"]])
+summary(STA_keep_ID_bamb[["NMP"]])
 ```
 
 All seems good.
@@ -221,7 +219,8 @@ All seems good.
 
 ## Re-order columns and add units as comment 
 ```{r}
-STA_final <- select(STA_keep_ID, Sample, Chert_type, Chert_tool, Objective:Strokes, NMP:NewEplsar)
+STA_final <- select(STA_keep_ID_bamb, Sample, Chert_type, Chert_tool, Bamboo_sp, 
+                    Objective:Strokes, NMP:NewEplsar)
 comment(STA_final) <- STA_units
 ```
 
@@ -274,7 +273,7 @@ sessionInfo()
 
 ```{r, echo = FALSE}
 pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
-                           out.dir = "analysis/scripts", bib.file = "ISEA_2a_STA-import")
+                           out.dir = "analysis/scripts", bib.file = "ISEA_3a_STA-import")
 knitr::kable(pkgs_cite)
 ```
 

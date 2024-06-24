@@ -12,7 +12,7 @@
 <meta name="author" content="Ivan Calandra" />
 
 
-<title>Import dataset from the surface texture analysis for the ISEA use-wear project</title>
+<title>Plot tools’ weights dataset for the ISEA use-wear project</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1573,10 +1573,10 @@ border-radius: 0px;
 
 
 
-<h1 class="title toc-ignore">Import dataset from the surface texture
-analysis for the ISEA use-wear project</h1>
+<h1 class="title toc-ignore">Plot tools’ weights dataset for the ISEA
+use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-06-24 11:59:07 CEST</h4>
+<h4 class="date">2024-06-24 13:38:31 CEST</h4>
 
 </div>
 
@@ -1584,446 +1584,229 @@ analysis for the ISEA use-wear project</h1>
 <hr />
 <div id="goal-of-the-script" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Goal of the script</h1>
-<p>This script formats the output of the resulting files from applying
-surface texture analysis to a sample of experimental lithics. The script
-will:</p>
+<p>This script imports and plots the tools’ weights before and after the
+experiments.<br />
+The script will:</p>
 <ol style="list-style-type: decimal">
-<li>Read in the original files<br />
+<li>Read in the original CSV-file<br />
 </li>
-<li>Format the data<br />
+<li>Save data as Rbin and XLSX<br />
 </li>
-<li>Write XLSX file and save R objects ready for further analysis in
-R</li>
+<li>Plot<br />
+</li>
+<li>Compute summary statistics</li>
 </ol>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>dir_in  <span class="ot">&lt;-</span> <span class="st">&quot;analysis/raw_data&quot;</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>dir_out <span class="ot">&lt;-</span> <span class="st">&quot;analysis/derived_data&quot;</span></span></code></pre></div>
-<p>Raw data must be located in “./analysis/raw_data”.<br />
-Formatted data will be saved in “./analysis/derived_data”.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>dir_in <span class="ot">&lt;-</span> <span class="st">&quot;analysis/raw_data/&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>dir_data <span class="ot">&lt;-</span> <span class="st">&quot;analysis/derived_data/&quot;</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>dir_plots <span class="ot">&lt;-</span> <span class="st">&quot;analysis/plots/&quot;</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>dir_stats <span class="ot">&lt;-</span> <span class="st">&quot;analysis/stats/&quot;</span></span></code></pre></div>
+<p>Input CSV file file must be located in “./analysis/raw_data/”.<br />
+Plots will be saved in “./analysis/plots/”. Processed datasets will be
+saved in “./analysis/derived_data/”. Summary statistics will be saved in
+“./analysis/stats/”.</p>
 <p>The knit directory for this script is the project directory.</p>
 <hr />
 </div>
 <div id="load-packages" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Load packages</h1>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(grateful)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">library</span>(rmarkdown)</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">library</span>(writexl)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(doBy)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">library</span>(grateful)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">library</span>(rmarkdown)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">library</span>(writexl)</span></code></pre></div>
 <hr />
 </div>
-<div id="read-and-format-data" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Read and format
-data</h1>
-<div id="read-in-csv-file" class="section level2" number="3.1">
-<h2><span class="header-section-number">3.1</span> Read in CSV file</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Loop through list of CSV files and read in</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>STA <span class="ot">&lt;-</span> <span class="fu">list.files</span>(dir_in, <span class="at">pattern =</span> <span class="st">&quot;STA</span><span class="sc">\\</span><span class="st">.csv$&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>       <span class="fu">read.csv</span>(<span class="at">header =</span> <span class="cn">FALSE</span>, <span class="at">na.strings =</span> <span class="st">&quot;*****&quot;</span>, <span class="at">fileEncoding =</span> <span class="st">&#39;WINDOWS-1252&#39;</span>)</span></code></pre></div>
-</div>
-<div id="select-relevant-columns-and-rows" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> Select relevant
-columns and rows</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>STA_keep_col  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">11</span><span class="sc">:</span><span class="dv">46</span>)                               <span class="co"># Define columns to keep</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>STA_keep_rows <span class="ot">&lt;-</span> <span class="fu">which</span>(STA[[<span class="dv">1</span>]] <span class="sc">!=</span> <span class="st">&quot;#&quot;</span>)                    <span class="co"># Define rows to keep</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>STA_keep      <span class="ot">&lt;-</span> STA[STA_keep_rows, STA_keep_col] <span class="co"># Subset rows and columns</span></span></code></pre></div>
-</div>
-<div id="identify-results-using-frame-numbers" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> Identify results
-using frame numbers</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>frames <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">unlist</span>(STA[<span class="dv">1</span>, STA_keep_col]))</span></code></pre></div>
-<pre><code>Warning: NAs introduced by coercion</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>ID <span class="ot">&lt;-</span> <span class="fu">which</span>(frames <span class="sc">==</span> <span class="dv">26</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>ISO <span class="ot">&lt;-</span> <span class="fu">which</span>(frames <span class="sc">==</span> <span class="dv">28</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>furrow <span class="ot">&lt;-</span> <span class="fu">which</span>(frames <span class="sc">==</span> <span class="dv">29</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>diriso <span class="ot">&lt;-</span> <span class="fu">which</span>(frames <span class="sc">%in%</span> <span class="dv">30</span><span class="sc">:</span><span class="dv">31</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>SSFA <span class="ot">&lt;-</span> <span class="fu">which</span>(frames <span class="sc">%in%</span> <span class="dv">32</span><span class="sc">:</span><span class="dv">33</span>)</span></code></pre></div>
-</div>
-<div id="add-headers" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> Add headers</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Get headers from 2nd row</span></span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">colnames</span>(STA_keep) <span class="ot">&lt;-</span> STA[<span class="dv">2</span>, STA_keep_col] <span class="sc">%&gt;%</span> </span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  </span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>                      <span class="co"># Convert to valid names</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>                      <span class="fu">make.names</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  </span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>                      <span class="co"># Delete repeated periods</span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                      <span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.+&quot;</span>, <span class="st">&quot;</span><span class="sc">\\</span><span class="st">.&quot;</span>, <span class="at">x =</span> .) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  </span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>                      <span class="co"># Delete periods at the end of the names</span></span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>                      <span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">.$&quot;</span>, <span class="st">&quot;&quot;</span>, <span class="at">x =</span> .)</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  </span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co"># Keep parameter name before the first period for ISO</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="fu">colnames</span>(STA_keep)[ISO] <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(<span class="fu">names</span>(STA_keep)[ISO], <span class="st">&quot;.&quot;</span>, <span class="at">fixed =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>                           <span class="fu">sapply</span>(<span class="st">`</span><span class="at">[[</span><span class="st">`</span>, <span class="dv">1</span>)</span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co"># Keep parameter name after the last period for SSFA</span></span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="fu">colnames</span>(STA_keep)[SSFA] <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;^([A-Za-z0-9]+</span><span class="sc">\\</span><span class="st">.)+&quot;</span>, <span class="st">&quot;&quot;</span>, <span class="fu">colnames</span>(STA_keep)[SSFA])</span>
-<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a></span>
-<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co"># Edit header non-measured point ratios</span></span>
-<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="fu">colnames</span>(STA_keep)[ID] <span class="ot">&lt;-</span> <span class="st">&quot;NMP&quot;</span></span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a></span>
-<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co"># Edit header for name of surfaces</span></span>
-<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="fu">colnames</span>(STA_keep)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">&quot;Name&quot;</span></span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co"># Check results</span></span>
-<span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="fu">str</span>(STA_keep)</span></code></pre></div>
-<pre><code>&#39;data.frame&#39;:   96 obs. of  37 variables:
- $ Name                    : chr  &quot;D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.7&quot;| __truncated__ &quot;D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.7&quot;| __truncated__ &quot;D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.7&quot;| __truncated__ &quot;D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.7&quot;| __truncated__ ...
- $ NMP                     : chr  &quot;0.199957992&quot; &quot;0.199957992&quot; &quot;0.199957992&quot; &quot;0.1997479521&quot; ...
- $ Sq                      : chr  &quot;357.3100043&quot; &quot;191.098347&quot; &quot;471.9081352&quot; &quot;341.9963087&quot; ...
- $ Ssk                     : chr  &quot;0.2142039482&quot; &quot;-1.113060972&quot; &quot;0.1782349483&quot; &quot;-0.4827665534&quot; ...
- $ Sku                     : chr  &quot;3.572470153&quot; &quot;5.748939883&quot; &quot;3.617311939&quot; &quot;3.993074559&quot; ...
- $ Sp                      : chr  &quot;1419.576102&quot; &quot;461.636368&quot; &quot;1680.023771&quot; &quot;971.5409887&quot; ...
- $ Sv                      : chr  &quot;1545.303564&quot; &quot;914.8954458&quot; &quot;1554.456194&quot; &quot;1339.231019&quot; ...
- $ Sz                      : chr  &quot;2964.879665&quot; &quot;1376.531814&quot; &quot;3234.479964&quot; &quot;2310.772008&quot; ...
- $ Sa                      : chr  &quot;280.9126963&quot; &quot;137.9228996&quot; &quot;363.2579132&quot; &quot;257.0249141&quot; ...
- $ Smr                     : chr  &quot;11.76356891&quot; &quot;97.77223198&quot; &quot;8.120663738&quot; &quot;57.82411091&quot; ...
- $ Smc                     : chr  &quot;457.6619638&quot; &quot;203.5721089&quot; &quot;610.6843806&quot; &quot;397.9081922&quot; ...
- $ Sxp                     : chr  &quot;635.0390839&quot; &quot;538.2645053&quot; &quot;877.8419055&quot; &quot;825.3226558&quot; ...
- $ Sal                     : chr  &quot;4.873127241&quot; &quot;5.211629034&quot; &quot;4.882320124&quot; &quot;5.274231682&quot; ...
- $ Str                     : chr  &quot;0.7581493861&quot; &quot;0.5687682374&quot; &quot;0.7032365061&quot; &quot;0.6848816212&quot; ...
- $ Std                     : chr  &quot;12.98930067&quot; &quot;3.488484842&quot; &quot;122.2382235&quot; &quot;175.9984065&quot; ...
- $ Ssw                     : chr  &quot;0.4248838084&quot; &quot;0.4248838084&quot; &quot;0.4248838084&quot; &quot;0.4248838084&quot; ...
- $ Sdq                     : chr  &quot;0.2997759573&quot; &quot;0.1077379432&quot; &quot;0.3679264124&quot; &quot;0.1962780616&quot; ...
- $ Sdr                     : chr  &quot;4.213510718&quot; &quot;0.5674549774&quot; &quot;6.192882483&quot; &quot;1.82887364&quot; ...
- $ Vm                      : chr  &quot;0.02065507767&quot; &quot;0.008262461435&quot; &quot;0.02790831635&quot; &quot;0.01743816527&quot; ...
- $ Vv                      : chr  &quot;0.4783037437&quot; &quot;0.2118331583&quot; &quot;0.638574011&quot; &quot;0.4153293317&quot; ...
- $ Vmp                     : chr  &quot;0.02065507767&quot; &quot;0.008262461435&quot; &quot;0.02790831635&quot; &quot;0.01743816527&quot; ...
- $ Vmc                     : chr  &quot;0.3087764946&quot; &quot;0.1410963832&quot; &quot;0.388066503&quot; &quot;0.2731001371&quot; ...
- $ Vvc                     : chr  &quot;0.442046657&quot; &quot;0.1781941588&quot; &quot;0.5852113083&quot; &quot;0.3623891563&quot; ...
- $ Vvv                     : chr  &quot;0.03625708677&quot; &quot;0.03363899956&quot; &quot;0.05336270273&quot; &quot;0.0529401754&quot; ...
- $ Maximum.depth.of.furrows: chr  &quot;1942.645932&quot; &quot;1100.149344&quot; &quot;2275.049793&quot; &quot;1627.003742&quot; ...
- $ Mean.depth.of.furrows   : chr  &quot;618.3156029&quot; &quot;288.0930895&quot; &quot;849.3012724&quot; &quot;577.8516544&quot; ...
- $ Mean.density.of.furrows : chr  &quot;4525.126446&quot; &quot;3018.786478&quot; &quot;4494.570357&quot; &quot;3191.931152&quot; ...
- $ First.direction         : chr  &quot;0.008557293329&quot; &quot;179.9959727&quot; &quot;135.032573&quot; &quot;89.99939109&quot; ...
- $ Second.direction        : chr  &quot;135.0226689&quot; &quot;44.98590072&quot; &quot;0.01062171041&quot; &quot;135.0149268&quot; ...
- $ Third.direction         : chr  &quot;153.5546248&quot; &quot;134.9966958&quot; &quot;89.9877501&quot; &quot;179.9896475&quot; ...
- $ Texture.isotropy        : chr  &quot;71.19962688&quot; &quot;52.59435919&quot; &quot;70.93291413&quot; &quot;68.88923084&quot; ...
- $ Asfc                    : chr  &quot;9.485112657&quot; &quot;0.8677972883&quot; &quot;13.86047929&quot; &quot;2.864134488&quot; ...
- $ Smfc                    : chr  &quot;1.124339164&quot; &quot;1.993685999&quot; &quot;1.124339164&quot; &quot;3.767524759&quot; ...
- $ HAsfc9                  : chr  &quot;0.1154264841&quot; &quot;0.3643206898&quot; &quot;0.08100961788&quot; &quot;0.4563153235&quot; ...
- $ HAsfc81                 : chr  &quot;0.3151333336&quot; &quot;1.338234209&quot; &quot;0.2650550944&quot; &quot;0.9349029537&quot; ...
- $ epLsar                  : chr  &quot;0.001508254735&quot; &quot;0.002329623452&quot; &quot;0.0009464415845&quot; &quot;0.001365762769&quot; ...
- $ NewEplsar               : chr  &quot;0.01833031405&quot; &quot;0.01866926505&quot; &quot;0.01791760554&quot; &quot;0.01812746064&quot; ...</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">head</span>(STA_keep)</span></code></pre></div>
-<pre><code>                                                                                                                                                         Name
-4     D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_dorsal_loc1_shift-extract_0strokes.mnt
-5  D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_dorsal_loc1_shift-extract_2000strokes.mnt
-6     D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_dorsal_loc2_shift-extract_0strokes.mnt
-7  D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_dorsal_loc2_shift-extract_2000strokes.mnt
-8    D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_ventral_loc1_shift-extract_0strokes.mnt
-9 D:\\Data\\Riczar\\10_Mountains-analysis\\ConfoMap_shift-extract files\\ISEA-2_STA --- ISEA-Chert-A1_LSM_20x-0.70_ventral_loc1_shift-extract_2000strokes.mnt
-           NMP          Sq           Ssk         Sku          Sp          Sv
-4  0.199957992 357.3100043  0.2142039482 3.572470153 1419.576102 1545.303564
-5  0.199957992  191.098347  -1.113060972 5.748939883  461.636368 914.8954458
-6  0.199957992 471.9081352  0.1782349483 3.617311939 1680.023771 1554.456194
-7 0.1997479521 341.9963087 -0.4827665534 3.993074559 971.5409887 1339.231019
-8 0.1997479521 494.3200158  0.1601630524 3.540428899  1865.51752  1782.40934
-9 0.1995379122 750.0697139 -0.1556914727 3.433134179  2298.98245 2423.096683
-           Sz          Sa         Smr         Smc         Sxp         Sal
-4 2964.879665 280.9126963 11.76356891 457.6619638 635.0390839 4.873127241
-5 1376.531814 137.9228996 97.77223198 203.5721089 538.2645053 5.211629034
-6 3234.479964 363.2579132 8.120663738 610.6843806 877.8419055 4.882320124
-7 2310.772008 257.0249141 57.82411091 397.9081922 825.3226558 5.274231682
-8 3647.926859 383.6674209 4.769772956 599.8546361 921.5166666 4.548254255
-9 4722.079133 581.3923948 4.111890355 867.8968027 1656.443623 5.219969938
-           Str         Std          Ssw          Sdq          Sdr
-4 0.7581493861 12.98930067 0.4248838084 0.2997759573  4.213510718
-5 0.5687682374 3.488484842 0.4248838084 0.1077379432 0.5674549774
-6 0.7032365061 122.2382235 0.4248838084 0.3679264124  6.192882483
-7 0.6848816212 175.9984065 0.4248838084 0.1962780616   1.82887364
-8 0.3812569971 70.50046989 0.4248838084 0.3484251452  5.459935798
-9         &lt;NA&gt; 73.74764643 0.4248838084 0.3764939562  5.751872939
-              Vm           Vv            Vmp          Vmc          Vvc
-4  0.02065507767 0.4783037437  0.02065507767 0.3087764946  0.442046657
-5 0.008262461435 0.2118331583 0.008262461435 0.1410963832 0.1781941588
-6  0.02790831635  0.638574011  0.02790831635  0.388066503 0.5852113083
-7  0.01743816527 0.4153293317  0.01743816527 0.2731001371 0.3623891563
-8  0.03185295598 0.6316956006  0.03185295598 0.4271847979 0.5768187556
-9  0.04369081706 0.9116035875  0.04369081706 0.6312823917 0.8100545875
-            Vvv Maximum.depth.of.furrows Mean.depth.of.furrows
-4 0.03625708677              1942.645932           618.3156029
-5 0.03363899956              1100.149344           288.0930895
-6 0.05336270273              2275.049793           849.3012724
-7  0.0529401754              1627.003742           577.8516544
-8 0.05487684501              2427.416503            760.652286
-9      0.101549              3050.083105           1078.473001
-  Mean.density.of.furrows First.direction Second.direction Third.direction
-4             4525.126446  0.008557293329      135.0226689     153.5546248
-5             3018.786478     179.9959727      44.98590072     134.9966958
-6             4494.570357      135.032573    0.01062171041      89.9877501
-7             3191.931152     89.99939109      135.0149268     179.9896475
-8             4469.494957     71.46393499      63.47858619     44.98321506
-9             3565.618621     71.52643718      63.52035976     89.99952136
-  Texture.isotropy         Asfc        Smfc        HAsfc9      HAsfc81
-4      71.19962688  9.485112657 1.124339164  0.1154264841 0.3151333336
-5      52.59435919 0.8677972883 1.993685999  0.3643206898  1.338234209
-6      70.93291413  13.86047929 1.124339164 0.08100961788 0.2650550944
-7      68.88923084  2.864134488 3.767524759  0.4563153235 0.9349029537
-8      43.27506111  11.28658458 1.276959754  0.1509780971 0.3349801219
-9      9.334621652  8.154488245 1.993685999  0.4109842446 0.8871419954
-           epLsar     NewEplsar
-4  0.001508254735 0.01833031405
-5  0.002329623452 0.01866926505
-6 0.0009464415845 0.01791760554
-7  0.001365762769 0.01812746064
-8  0.003606264068 0.01742323272
-9  0.005868610881 0.01564744046</code></pre>
-</div>
-<div id="extract-units" class="section level2" number="3.5">
-<h2><span class="header-section-number">3.5</span> Extract units</h2>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Filter out rows which contains units</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>n_units <span class="ot">&lt;-</span> <span class="fu">filter</span>(STA, V4 <span class="sc">==</span> <span class="st">&quot;&lt;no unit&gt;&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>          </span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>           <span class="co"># Keep only unique/distinct rows of units</span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>           <span class="fu">distinct</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  </span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>           <span class="co"># Number of unique/distinct rows of units</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>           <span class="fu">nrow</span>()</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="cf">if</span> (n_units <span class="sc">!=</span> <span class="dv">1</span>) {</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="fu">stop</span>(<span class="st">&quot;The different datasets have different units&quot;</span>)</span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>  <span class="co"># Extract unit line from 3rd row for considered columns</span></span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  STA_units <span class="ot">&lt;-</span> <span class="fu">unlist</span>(STA[<span class="dv">3</span>, STA_keep_col[<span class="sc">-</span><span class="dv">1</span>]])</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>  <span class="co"># Get names associated to the units</span></span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>  <span class="fu">names</span>(STA_units) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(STA_keep)[<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a></span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>  <span class="co"># Combine into a data.frame for export</span></span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>  units_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">variable =</span> <span class="fu">names</span>(STA_units), <span class="at">units =</span> STA_units)</span>
-<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  <span class="fu">row.names</span>(units_table) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
-<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>}</span>
-<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a></span>
-<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co"># Check results</span></span>
-<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>units_table</span></code></pre></div>
-<pre><code>                   variable     units
-1                       NMP         %
-2                        Sq        nm
-3                       Ssk &lt;no unit&gt;
-4                       Sku &lt;no unit&gt;
-5                        Sp        nm
-6                        Sv        nm
-7                        Sz        nm
-8                        Sa        nm
-9                       Smr         %
-10                      Smc        nm
-11                      Sxp        nm
-12                      Sal        µm
-13                      Str &lt;no unit&gt;
-14                      Std         °
-15                      Ssw        µm
-16                      Sdq &lt;no unit&gt;
-17                      Sdr         %
-18                       Vm   µm³/µm²
-19                       Vv   µm³/µm²
-20                      Vmp   µm³/µm²
-21                      Vmc   µm³/µm²
-22                      Vvc   µm³/µm²
-23                      Vvv   µm³/µm²
-24 Maximum.depth.of.furrows        nm
-25    Mean.depth.of.furrows        nm
-26  Mean.density.of.furrows    cm/cm2
-27          First.direction         °
-28         Second.direction         °
-29          Third.direction         °
-30         Texture.isotropy         %
-31                     Asfc &lt;no unit&gt;
-32                     Smfc       µm²
-33                   HAsfc9 &lt;no unit&gt;
-34                  HAsfc81 &lt;no unit&gt;
-35                   epLsar &lt;no unit&gt;
-36                NewEplsar &lt;no unit&gt;</code></pre>
-</div>
-<div id="split-column-name" class="section level2" number="3.6">
-<h2><span class="header-section-number">3.6</span> Split column
-‘Name’</h2>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>STA_keep[<span class="fu">c</span>(<span class="st">&quot;Specimen&quot;</span>, <span class="st">&quot;Objective&quot;</span>, <span class="st">&quot;Side&quot;</span>, <span class="st">&quot;Location&quot;</span>, <span class="st">&quot;Strokes&quot;</span>)] <span class="ot">&lt;-</span> STA_keep<span class="sc">$</span>Name <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  </span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>                                                                       <span class="co"># Split by &quot; --- &quot; and keep 2nd element</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>                                                                       <span class="fu">str_split_i</span>(<span class="st">&quot; --- &quot;</span>, <span class="at">i =</span> <span class="dv">2</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>                                                                       </span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>                                                                       <span class="co"># Delete &quot;.mnt&quot;</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>                                                                       <span class="fu">gsub</span>(<span class="st">&quot;.mnt&quot;</span>, <span class="st">&quot;&quot;</span>, .) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>   </span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>                                                                       <span class="co"># Split by &quot;_&quot; into a matrix with 7 cols</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>                                                                       <span class="fu">str_split_fixed</span>(<span class="st">&quot;_&quot;</span>, <span class="at">n =</span> <span class="dv">7</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>  </span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>                                                                       <span class="co"># Keep all cols but cols 2 and 6</span></span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>                                                                       .[, <span class="sc">-</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">6</span>)]</span></code></pre></div>
-</div>
-<div id="split-column-specimen" class="section level2" number="3.7">
-<h2><span class="header-section-number">3.7</span> Split column
-‘Specimen’</h2>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>STA_keep[<span class="fu">c</span>(<span class="st">&quot;Chert_type&quot;</span>, <span class="st">&quot;Chert_tool&quot;</span>)] <span class="ot">&lt;-</span> STA_keep<span class="sc">$</span>Specimen <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>                                           </span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>                                           <span class="co"># Split by &quot;-&quot; and keep 3rd element   </span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>                                           <span class="fu">str_split_i</span>(<span class="st">&quot;-&quot;</span>, <span class="at">i =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  </span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                                           <span class="co"># Split after the first capital letter</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                                           <span class="fu">str_split</span>(<span class="st">&quot;(?&lt;=[A-Z]{1})&quot;</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-</div>
-<div id="add-column-with-sample-id" class="section level2" number="3.8">
-<h2><span class="header-section-number">3.8</span> Add column with
-sample ID</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Create a data.frame with correspondence between chert type, chert tool and sample ID</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>sample_ID <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Sample =</span> <span class="fu">paste0</span>(<span class="st">&quot;ISEA-EX&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>), </span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>                        <span class="at">Chert_type =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>), <span class="at">times =</span> <span class="dv">6</span>),</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                        <span class="at">Chert_tool =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">each =</span> <span class="dv">2</span>))</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co"># Merge the data.frames by chert type and chert tool</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>STA_keep_ID <span class="ot">&lt;-</span> <span class="fu">merge</span>(STA_keep, sample_ID, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Chert_type&quot;</span>, <span class="st">&quot;Chert_tool&quot;</span>))</span></code></pre></div>
-</div>
-<div id="keep-only-numerical-parts-in-columns-location-and-strokes" class="section level2" number="3.9">
-<h2><span class="header-section-number">3.9</span> Keep only numerical
-parts in columns “Location” and “Strokes”</h2>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>STA_keep_ID<span class="sc">$</span>Location <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID<span class="sc">$</span>Location)</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>STA_keep_ID<span class="sc">$</span>Strokes <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">gsub</span>(<span class="st">&quot;strokes&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID<span class="sc">$</span>Strokes))</span></code></pre></div>
-</div>
-<div id="convert-all-parameter-variables-to-numeric" class="section level2" number="3.10">
-<h2><span class="header-section-number">3.10</span> Convert all
-parameter variables to numeric</h2>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>STA_keep_ID <span class="ot">&lt;-</span> <span class="fu">type_convert</span>(STA_keep_ID)</span></code></pre></div>
-</div>
-<div id="nmp-ratios" class="section level2" number="3.11">
-<h2><span class="header-section-number">3.11</span> NMP ratios</h2>
-<p>The summary statistics for NMP ratios are:</p>
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.1979  0.1997  0.2000  0.1998  0.2000  0.2002 </code></pre>
-<p>All seems good.</p>
-</div>
-<div id="re-order-columns-and-add-units-as-comment" class="section level2" number="3.12">
-<h2><span class="header-section-number">3.12</span> Re-order columns and
-add units as comment</h2>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>STA_final <span class="ot">&lt;-</span> <span class="fu">select</span>(STA_keep_ID, Sample, Chert_type, Chert_tool, Objective<span class="sc">:</span>Strokes, NMP<span class="sc">:</span>NewEplsar)</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">comment</span>(STA_final) <span class="ot">&lt;-</span> STA_units</span></code></pre></div>
-<p>Type <code>comment(STA_final)</code> to check the units of the
-parameters.</p>
-</div>
-<div id="check-the-result" class="section level2" number="3.13">
-<h2><span class="header-section-number">3.13</span> Check the
-result</h2>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">str</span>(STA_final)</span></code></pre></div>
-<pre><code>&#39;data.frame&#39;:   96 obs. of  43 variables:
- $ Sample                  : chr  &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; ...
- $ Chert_type              : chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
- $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
- $ Objective               : chr  &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; ...
- $ Side                    : chr  &quot;dorsal&quot; &quot;dorsal&quot; &quot;dorsal&quot; &quot;dorsal&quot; ...
- $ Location                : num  1 1 2 2 1 1 2 2 1 1 ...
- $ Strokes                 : Factor w/ 2 levels &quot;0&quot;,&quot;2000&quot;: 1 2 1 2 1 2 1 2 1 2 ...
- $ NMP                     : num  0.2 0.2 0.2 0.2 0.2 ...
- $ Sq                      : num  357 191 472 342 494 ...
- $ Ssk                     : num  0.214 -1.113 0.178 -0.483 0.16 ...
- $ Sku                     : num  3.57 5.75 3.62 3.99 3.54 ...
- $ Sp                      : num  1420 462 1680 972 1866 ...
- $ Sv                      : num  1545 915 1554 1339 1782 ...
- $ Sz                      : num  2965 1377 3234 2311 3648 ...
- $ Sa                      : num  281 138 363 257 384 ...
- $ Smr                     : num  11.76 97.77 8.12 57.82 4.77 ...
- $ Smc                     : num  458 204 611 398 600 ...
- $ Sxp                     : num  635 538 878 825 922 ...
- $ Sal                     : num  4.87 5.21 4.88 5.27 4.55 ...
- $ Str                     : num  0.758 0.569 0.703 0.685 0.381 ...
- $ Std                     : num  12.99 3.49 122.24 176 70.5 ...
- $ Ssw                     : num  0.425 0.425 0.425 0.425 0.425 ...
- $ Sdq                     : num  0.3 0.108 0.368 0.196 0.348 ...
- $ Sdr                     : num  4.214 0.567 6.193 1.829 5.46 ...
- $ Vm                      : num  0.02066 0.00826 0.02791 0.01744 0.03185 ...
- $ Vv                      : num  0.478 0.212 0.639 0.415 0.632 ...
- $ Vmp                     : num  0.02066 0.00826 0.02791 0.01744 0.03185 ...
- $ Vmc                     : num  0.309 0.141 0.388 0.273 0.427 ...
- $ Vvc                     : num  0.442 0.178 0.585 0.362 0.577 ...
- $ Vvv                     : num  0.0363 0.0336 0.0534 0.0529 0.0549 ...
- $ Maximum.depth.of.furrows: num  1943 1100 2275 1627 2427 ...
- $ Mean.depth.of.furrows   : num  618 288 849 578 761 ...
- $ Mean.density.of.furrows : num  4525 3019 4495 3192 4469 ...
- $ First.direction         : num  8.56e-03 1.80e+02 1.35e+02 9.00e+01 7.15e+01 ...
- $ Second.direction        : num  135.0227 44.9859 0.0106 135.0149 63.4786 ...
- $ Third.direction         : num  154 135 90 180 45 ...
- $ Texture.isotropy        : num  71.2 52.6 70.9 68.9 43.3 ...
- $ Asfc                    : num  9.485 0.868 13.86 2.864 11.287 ...
- $ Smfc                    : num  1.12 1.99 1.12 3.77 1.28 ...
- $ HAsfc9                  : num  0.115 0.364 0.081 0.456 0.151 ...
- $ HAsfc81                 : num  0.315 1.338 0.265 0.935 0.335 ...
- $ epLsar                  : num  0.001508 0.00233 0.000946 0.001366 0.003606 ...
- $ NewEplsar               : num  0.0183 0.0187 0.0179 0.0181 0.0174 ...
- - attr(*, &quot;comment&quot;)= Named chr [1:36] &quot;%&quot; &quot;nm&quot; &quot;&lt;no unit&gt;&quot; &quot;&lt;no unit&gt;&quot; ...
-  ..- attr(*, &quot;names&quot;)= chr [1:36] &quot;NMP&quot; &quot;Sq&quot; &quot;Ssk&quot; &quot;Sku&quot; ...</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">head</span>(STA_final)</span></code></pre></div>
-<pre><code>    Sample Chert_type Chert_tool Objective    Side Location Strokes       NMP
-1 ISEA-EX1          A          1  20x-0.70  dorsal        1       0 0.1999580
-2 ISEA-EX1          A          1  20x-0.70  dorsal        1    2000 0.1999580
-3 ISEA-EX1          A          1  20x-0.70  dorsal        2       0 0.1999580
-4 ISEA-EX1          A          1  20x-0.70  dorsal        2    2000 0.1997480
-5 ISEA-EX1          A          1  20x-0.70 ventral        1       0 0.1997480
-6 ISEA-EX1          A          1  20x-0.70 ventral        1    2000 0.1995379
-        Sq        Ssk      Sku        Sp        Sv       Sz       Sa       Smr
-1 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880 280.9127 11.763569
-2 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532 137.9229 97.772232
-3 471.9081  0.1782349 3.617312 1680.0238 1554.4562 3234.480 363.2579  8.120664
-4 341.9963 -0.4827666 3.993075  971.5410 1339.2310 2310.772 257.0249 57.824111
-5 494.3200  0.1601631 3.540429 1865.5175 1782.4093 3647.927 383.6674  4.769773
-6 750.0697 -0.1556915 3.433134 2298.9824 2423.0967 4722.079 581.3924  4.111890
-       Smc       Sxp      Sal       Str        Std       Ssw       Sdq      Sdr
-1 457.6620  635.0391 4.873127 0.7581494  12.989301 0.4248838 0.2997760 4.213511
-2 203.5721  538.2645 5.211629 0.5687682   3.488485 0.4248838 0.1077379 0.567455
-3 610.6844  877.8419 4.882320 0.7032365 122.238224 0.4248838 0.3679264 6.192882
-4 397.9082  825.3227 5.274232 0.6848816 175.998406 0.4248838 0.1962781 1.828874
-5 599.8546  921.5167 4.548254 0.3812570  70.500470 0.4248838 0.3484251 5.459936
-6 867.8968 1656.4436 5.219970        NA  73.747646 0.4248838 0.3764940 5.751873
-           Vm        Vv         Vmp       Vmc       Vvc        Vvv
-1 0.020655078 0.4783037 0.020655078 0.3087765 0.4420467 0.03625709
-2 0.008262461 0.2118332 0.008262461 0.1410964 0.1781942 0.03363900
-3 0.027908316 0.6385740 0.027908316 0.3880665 0.5852113 0.05336270
-4 0.017438165 0.4153293 0.017438165 0.2731001 0.3623892 0.05294018
-5 0.031852956 0.6316956 0.031852956 0.4271848 0.5768188 0.05487685
-6 0.043690817 0.9116036 0.043690817 0.6312824 0.8100546 0.10154900
-  Maximum.depth.of.furrows Mean.depth.of.furrows Mean.density.of.furrows
-1                 1942.646              618.3156                4525.126
-2                 1100.149              288.0931                3018.786
-3                 2275.050              849.3013                4494.570
-4                 1627.004              577.8517                3191.931
-5                 2427.417              760.6523                4469.495
-6                 3050.083             1078.4730                3565.619
-  First.direction Second.direction Third.direction Texture.isotropy       Asfc
-1    8.557293e-03     135.02266890       153.55462        71.199627  9.4851127
-2    1.799960e+02      44.98590072       134.99670        52.594359  0.8677973
-3    1.350326e+02       0.01062171        89.98775        70.932914 13.8604793
-4    8.999939e+01     135.01492680       179.98965        68.889231  2.8641345
-5    7.146393e+01      63.47858619        44.98322        43.275061 11.2865846
-6    7.152644e+01      63.52035976        89.99952         9.334622  8.1544882
-      Smfc     HAsfc9   HAsfc81       epLsar  NewEplsar
-1 1.124339 0.11542648 0.3151333 0.0015082547 0.01833031
-2 1.993686 0.36432069 1.3382342 0.0023296235 0.01866927
-3 1.124339 0.08100962 0.2650551 0.0009464416 0.01791761
-4 3.767525 0.45631532 0.9349030 0.0013657628 0.01812746
-5 1.276960 0.15097810 0.3349801 0.0036062641 0.01742323
-6 1.993686 0.41098424 0.8871420 0.0058686109 0.01564744</code></pre>
+<div id="read-in-csv-file" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Read in CSV file</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>file_in <span class="ot">&lt;-</span> <span class="fu">list.files</span>(dir_in, <span class="at">pattern =</span> <span class="st">&quot;weight</span><span class="sc">\\</span><span class="st">.csv$&quot;</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>weights <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(file_in, <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">str</span>(weights)</span></code></pre></div>
+<pre><code>&#39;data.frame&#39;:   12 obs. of  6 variables:
+ $ Sample            : chr  &quot;ISEA-EX1&quot; &quot;ISEA-EX2&quot; &quot;ISEA-EX3&quot; &quot;ISEA-EX4&quot; ...
+ $ Chert_type        : chr  &quot;A&quot; &quot;B&quot; &quot;A&quot; &quot;B&quot; ...
+ $ Chert_tool        : int  1 1 2 2 3 3 4 4 5 5 ...
+ $ Bamboo_sp         : chr  &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; ...
+ $ Weight_before_[mg]: num  30.1 21.5 28.6 16.7 16.7 ...
+ $ Weight_after_[mg] : num  30 21.5 28.6 16.7 16.7 ...</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">head</span>(weights)</span></code></pre></div>
+<pre><code>    Sample Chert_type Chert_tool        Bamboo_sp Weight_before_[mg]
+1 ISEA-EX1          A          1 Bambusa blumeana              30.07
+2 ISEA-EX2          B          1 Bambusa blumeana              21.52
+3 ISEA-EX3          A          2 Bambusa blumeana              28.65
+4 ISEA-EX4          B          2 Bambusa blumeana              16.69
+5 ISEA-EX5          A          3 Bambusa blumeana              16.69
+6 ISEA-EX6          B          3 Bambusa blumeana              10.25
+  Weight_after_[mg]
+1             30.00
+2             21.50
+3             28.62
+4             16.67
+5             16.66
+6             10.04</code></pre>
 <hr />
-</div>
 </div>
 <div id="save-data" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Save data</h1>
 <div id="as-xlsx" class="section level2" number="4.1">
 <h2><span class="header-section-number">4.1</span> As XLSX</h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">list</span>(<span class="st">&quot;data&quot;</span> <span class="ot">=</span> STA_final, <span class="st">&quot;units&quot;</span> <span class="ot">=</span> units_table), <span class="at">path =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.xlsx&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(weights, <span class="at">path =</span> <span class="fu">paste0</span>(dir_data, <span class="st">&quot;/ISEA_use-wear_Weights.xlsx&quot;</span>))</span></code></pre></div>
 </div>
 <div id="as-rbin" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> As Rbin</h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">saveObject</span>(STA_final, <span class="at">file =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.Rbin&quot;</span>))</span></code></pre></div>
-<p>Rbin files (e.g. <code>ISEA_use-wear_STA.Rbin</code>) can be easily
-read into an R object (e.g. <code>rbin_data</code>) using the following
-code:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>rbin_data <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="st">&quot;ISEA_use-wear_STA.Rbin&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">saveObject</span>(weights, <span class="at">file =</span> <span class="fu">paste0</span>(dir_data, <span class="st">&quot;/ISEA_use-wear_Weights.Rbin&quot;</span>))</span></code></pre></div>
+<p>Rbin files (e.g. <code>ISEA_use-wear_Weights.Rbin</code>) can be
+easily read into an R object (e.g. <code>rbin_data</code>) using the
+following code:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>rbin_data <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="st">&quot;ISEA_use-wear_Weights.Rbin&quot;</span>)</span></code></pre></div>
 <hr />
 </div>
 </div>
-<div id="sessioninfo" class="section level1" number="5">
-<h1><span class="header-section-number">5</span> sessionInfo()</h1>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div id="plot" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Plot</h1>
+<div id="pivot-to-long-format-for-plotting" class="section level2" number="5.1">
+<h2><span class="header-section-number">5.1</span> Pivot to long format
+for plotting</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>weights_long <span class="ot">&lt;-</span>  weights <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                 <span class="fu">pivot_longer</span>(<span class="fu">contains</span>(<span class="st">&quot;Weight&quot;</span>), <span class="at">names_to =</span> <span class="st">&quot;State_full&quot;</span>, <span class="at">values_to =</span> <span class="st">&quot;Weight [mg]&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                 <span class="fu">mutate</span>(<span class="at">State =</span> <span class="fu">factor</span>(<span class="fu">gsub</span>(<span class="st">&quot;Weight_|_</span><span class="sc">\\</span><span class="st">[mg</span><span class="sc">\\</span><span class="st">]&quot;</span>, <span class="st">&quot;&quot;</span>, State_full), </span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                                       <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;before&quot;</span>, <span class="st">&quot;after&quot;</span>)))</span></code></pre></div>
+</div>
+<div id="format-column-names-for-nice-plotting" class="section level2" number="5.2">
+<h2><span class="header-section-number">5.2</span> Format column names
+for nice plotting</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Color</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>color_name <span class="ot">&lt;-</span> <span class="st">&quot;Chert_type&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>color_name_leg <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>, <span class="st">&quot; &quot;</span>, color_name)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># Shapes</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>shape_name <span class="ot">&lt;-</span> <span class="st">&quot;Bamboo_sp&quot;</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>shape_name_leg <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;_&quot;</span>, <span class="st">&quot; &quot;</span>, shape_name)</span></code></pre></div>
+</div>
+<div id="absolute-weights" class="section level2" number="5.3">
+<h2><span class="header-section-number">5.3</span> Absolute weights</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>             <span class="co"># Define plot</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>p_weights <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(weights_long, <span class="fu">aes</span>(<span class="at">x =</span> State, <span class="at">y =</span> .data[[<span class="st">&quot;Weight [mg]&quot;</span>]], </span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                      <span class="at">color =</span> .data[[color_name]], <span class="at">shape =</span> .data[[shape_name]])) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>             </span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>             <span class="co"># Add points</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>             <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  </span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>             <span class="co"># Add lines to connect points with identical&quot;Sample ID</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>             <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="fu">aes</span>(<span class="at">group =</span> Sample), <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  </span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>             <span class="co"># Add Sample ID to points at &quot;before&quot; state</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>             <span class="fu">geom_text_repel</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">ifelse</span>(State <span class="sc">==</span> <span class="st">&quot;before&quot;</span>, Sample, <span class="st">&quot;&quot;</span>)), <span class="at">show.legend =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>                             <span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">nudge_x =</span> <span class="sc">-</span><span class="fl">0.1</span>, <span class="at">direction =</span> <span class="st">&quot;y&quot;</span>, </span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>                             <span class="at">min.segment.length =</span> <span class="dv">0</span>, <span class="at">segment.size =</span> <span class="fl">0.3</span>, <span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>   </span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>             <span class="co"># Light theme</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a>             <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a>  </span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a>             <span class="co"># Reduce margins around the plot</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a>             <span class="fu">scale_x_discrete</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">add =</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.1</span>))) <span class="sc">+</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a>  </span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a>             <span class="co"># The qualitative &#39;Set2&#39; palette of RColorBrewer is colorblind friendly</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a>             <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&#39;Set2&#39;</span>) <span class="sc">+</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a>  </span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a>             <span class="co"># Remove xlab and use the clean name for the legend</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a>             <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">color =</span> color_name_leg, <span class="at">shape =</span> shape_name_leg)</span></code></pre></div>
+</div>
+<div id="weight-differences" class="section level2" number="5.4">
+<h2><span class="header-section-number">5.4</span> Weight
+differences</h2>
+<p>In order to improve the readability of the weight changes, only the
+differences are plotted.</p>
+<p>The difference is the weight after minus the weight before. Since all
+samples lost weight during the experiment, the absolute values are
+plotted in order to only show the magnitude of the difference.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Add column Weight_diff</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>weights <span class="ot">&lt;-</span> <span class="fu">mutate</span>(weights, <span class="at">Weight_diff =</span> <span class="fu">abs</span>(<span class="st">`</span><span class="at">Weight_after_[mg]</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">Weight_before_[mg]</span><span class="st">`</span>))</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>          <span class="co"># Define plot</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>p_diff <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(weights, <span class="fu">aes</span>(<span class="at">x =</span> .data[[color_name]], <span class="at">y =</span> Weight_diff, </span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>                              <span class="at">color =</span> .data[[color_name]], <span class="at">shape =</span> .data[[shape_name]])) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>          </span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>          <span class="co"># Add points</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>          <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>  </span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>          <span class="co"># Add Sample ID to points at &quot;before&quot; state</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>          <span class="fu">geom_text_repel</span>(<span class="fu">aes</span>(<span class="at">label =</span> Sample), <span class="at">show.legend =</span> <span class="cn">FALSE</span>, <span class="at">hjust =</span> <span class="dv">1</span>, <span class="at">nudge_x =</span> <span class="sc">-</span><span class="fl">0.1</span>, </span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>                          <span class="at">direction =</span> <span class="st">&quot;y&quot;</span>, <span class="at">min.segment.length =</span> <span class="dv">0</span>, <span class="at">segment.size =</span> <span class="fl">0.3</span>, <span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">+</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>  </span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>          <span class="co"># Light theme</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>          <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>  </span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>          <span class="co"># Reduce margins around the plot</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>          <span class="fu">scale_x_discrete</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">add =</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">0.05</span>))) <span class="sc">+</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>  </span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>          <span class="co"># The qualitative &#39;Set2&#39; palette of RColorBrewer is colorblind friendly</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a>          <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&#39;Set2&#39;</span>) <span class="sc">+</span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>  </span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>          <span class="co"># Remove xlab and use the clean name for the legend</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a>          <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">&quot;Weight difference [mg]&quot;</span>,<span class="at">color =</span> color_name_leg, <span class="at">shape =</span> shape_name_leg)</span></code></pre></div>
+</div>
+<div id="combine-and-plot-plots" class="section level2" number="5.5">
+<h2><span class="header-section-number">5.5</span> Combine and plot
+plots</h2>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>p_all <span class="ot">&lt;-</span> p_weights <span class="sc">+</span> p_diff <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">&#39;collect&#39;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">plot</span>(p_all)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+</div>
+<div id="save-plot" class="section level2" number="5.6">
+<h2><span class="header-section-number">5.6</span> Save plot</h2>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">plot =</span> p_all, <span class="fu">paste0</span>(dir_plots, <span class="st">&quot;/ISEA_use-wear_Weights-plots.pdf&quot;</span>), <span class="at">width =</span> <span class="dv">190</span>, <span class="at">unit =</span> <span class="st">&quot;mm&quot;</span>)</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="summary-statistics" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Summary statistics</h1>
+<div id="create-function-to-compute-the-statistics-at-once" class="section level2" number="6.1">
+<h2><span class="header-section-number">6.1</span> Create function to
+compute the statistics at once</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>nminmaxmeanmedsd <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    y <span class="ot">&lt;-</span> x[<span class="sc">!</span><span class="fu">is.na</span>(x)]     <span class="co"># Exclude NAs</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>    n_test <span class="ot">&lt;-</span> <span class="fu">length</span>(y)   <span class="co"># Sample size (n)</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    min_test <span class="ot">&lt;-</span> <span class="fu">min</span>(y)    <span class="co"># Minimum</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>    max_test <span class="ot">&lt;-</span> <span class="fu">max</span>(y)    <span class="co"># Maximum</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>    mean_test <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)  <span class="co"># Mean</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>    med_test <span class="ot">&lt;-</span> <span class="fu">median</span>(y) <span class="co"># Median</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>    sd_test <span class="ot">&lt;-</span> <span class="fu">sd</span>(y)      <span class="co"># Standard deviation</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">c</span>(n_test, min_test, max_test, mean_test, med_test, sd_test) <span class="co"># Concatenate</span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>    <span class="fu">names</span>(out) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;n&quot;</span>, <span class="st">&quot;min&quot;</span>, <span class="st">&quot;max&quot;</span>, <span class="st">&quot;mean&quot;</span>, <span class="st">&quot;median&quot;</span>, <span class="st">&quot;sd&quot;</span>)         <span class="co"># Name values</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>    <span class="fu">return</span>(out)                                                        <span class="co"># Object to return</span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="compute-summary-statistics" class="section level2" number="6.2">
+<h2><span class="header-section-number">6.2</span> Compute summary
+statistics</h2>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Remove unit from headers</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">names</span>(weights) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;_</span><span class="sc">\\</span><span class="st">[mg</span><span class="sc">\\</span><span class="st">]&quot;</span>, <span class="st">&quot;&quot;</span>, <span class="fu">names</span>(weights))</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># Exclude Chert_tool column from data</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>weights_sel <span class="ot">&lt;-</span> <span class="fu">select</span>(weights, <span class="sc">!</span>Chert_tool)</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co"># Compute summary statistics based on Chert_type</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>stats_chert <span class="ot">&lt;-</span> <span class="fu">summaryBy</span>(. <span class="sc">~</span> Chert_type, <span class="at">data =</span> weights_sel, <span class="at">FUN =</span> nminmaxmeanmedsd)</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co"># Compute summary statistics based on Bamboo_sp</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>stats_bamboo <span class="ot">&lt;-</span> <span class="fu">summaryBy</span>(. <span class="sc">~</span> Bamboo_sp, <span class="at">data =</span> weights_sel, <span class="at">FUN =</span> nminmaxmeanmedsd)</span></code></pre></div>
+</div>
+<div id="save-as-xlsx" class="section level2" number="6.3">
+<h2><span class="header-section-number">6.3</span> Save as XLSX</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">list</span>(<span class="st">&quot;Chert type&quot;</span> <span class="ot">=</span> stats_chert, <span class="st">&quot;Bamboo species&quot;</span> <span class="ot">=</span> stats_bamboo), </span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>           <span class="at">path =</span> <span class="fu">paste0</span>(dir_stats, <span class="st">&quot;/ISEA_use-wear_Weights-stats.xlsx&quot;</span>))</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="sessioninfo" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> sessionInfo()</h1>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>R version 4.4.0 (2024-04-24 ucrt)
 Platform: x86_64-w64-mingw32/x64
 Running under: Windows 10 x64 (build 19045)
@@ -2047,25 +1830,34 @@ attached base packages:
 other attached packages:
  [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
  [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
- [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27   
-[13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
-[17] grateful_0.2.7   
+ [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
+[13] R.oo_1.26.0       R.methodsS3_1.8.2 patchwork_1.2.0   knitr_1.47       
+[17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.21      
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.5      jsonlite_1.8.8    crayon_1.5.2      compiler_4.4.0   
- [5] tidyselect_1.2.1  jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8       
- [9] fastmap_1.2.0     R6_2.5.1          generics_0.1.3    munsell_0.5.1    
-[13] rprojroot_2.0.4   tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0     
-[17] rlang_1.1.4       utf8_1.2.4        stringi_1.8.4     cachem_1.1.0     
-[21] xfun_0.44         sass_0.4.9        timechange_0.3.0  cli_3.6.2        
-[25] withr_3.0.0       magrittr_2.0.3    digest_0.6.35     grid_4.4.0       
-[29] rstudioapi_0.16.0 hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5      
-[33] evaluate_0.23     glue_1.7.0        fansi_1.0.6       colorspace_2.1-0 
-[37] tools_4.4.0       pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
+ [1] gtable_0.3.5          xfun_0.44             bslib_0.7.0          
+ [4] lattice_0.22-6        tzdb_0.4.0            vctrs_0.6.5          
+ [7] tools_4.4.0           generics_0.1.3        fansi_1.0.6          
+[10] highr_0.11            pkgconfig_2.0.3       Matrix_1.7-0         
+[13] RColorBrewer_1.1-3    lifecycle_1.0.4       farver_2.1.2         
+[16] compiler_4.4.0        textshaping_0.4.0     microbenchmark_1.4.10
+[19] munsell_0.5.1         htmltools_0.5.8.1     sass_0.4.9           
+[22] yaml_2.3.8            pillar_1.9.0          jquerylib_0.1.4      
+[25] MASS_7.3-60.2         cachem_1.1.0          boot_1.3-30          
+[28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.35        
+[31] stringi_1.8.4         labeling_0.4.3        cowplot_1.1.3        
+[34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.0           
+[37] colorspace_2.1-0      cli_3.6.2             magrittr_2.0.3       
+[40] utf8_1.2.4            broom_1.0.6           withr_3.0.0          
+[43] scales_1.3.0          backports_1.5.0       timechange_0.3.0     
+[46] modelr_0.1.11         ragg_1.3.2            hms_1.1.3            
+[49] evaluate_0.23         rlang_1.1.4           Rcpp_1.0.12          
+[52] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
+[55] R6_2.5.1              systemfonts_1.1.0    </code></pre>
 <hr />
 </div>
-<div id="cite-r-packages-used" class="section level1" number="6">
-<h1><span class="header-section-number">6</span> Cite R packages
+<div id="cite-r-packages-used" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Cite R packages
 used</h1>
 <table>
 <colgroup>
@@ -2087,6 +1879,17 @@ used</h1>
 <td align="left"><span class="citation">R Core Team (2024)</span></td>
 </tr>
 <tr class="even">
+<td align="left">doBy</td>
+<td align="left">4.6.21</td>
+<td align="left"><span class="citation">Højsgaard and Halekoh
+(2024)</span></td>
+</tr>
+<tr class="odd">
+<td align="left">ggrepel</td>
+<td align="left">0.9.5</td>
+<td align="left"><span class="citation">Slowikowski (2024)</span></td>
+</tr>
+<tr class="even">
 <td align="left">grateful</td>
 <td align="left">0.2.7</td>
 <td align="left"><span class="citation">Rodriguez-Sanchez and Jackson
@@ -2099,39 +1902,44 @@ used</h1>
 (2024)</span></td>
 </tr>
 <tr class="even">
+<td align="left">patchwork</td>
+<td align="left">1.2.0</td>
+<td align="left"><span class="citation">Pedersen (2024)</span></td>
+</tr>
+<tr class="odd">
 <td align="left">R.methodsS3</td>
 <td align="left">1.8.2</td>
 <td align="left"><span class="citation">Bengtsson (2003a)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">R.oo</td>
 <td align="left">1.26.0</td>
 <td align="left"><span class="citation">Bengtsson (2003b)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">R.utils</td>
 <td align="left">2.12.3</td>
 <td align="left"><span class="citation">Bengtsson (2023)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">rmarkdown</td>
 <td align="left">2.27</td>
 <td align="left"><span class="citation">Xie, Allaire, and Grolemund
 (2018)</span>; <span class="citation">Xie, Dervieux, and Riederer
 (2020)</span>; <span class="citation">Allaire et al. (2024)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">tidyverse</td>
 <td align="left">2.0.0</td>
 <td align="left"><span class="citation">Wickham et al.
 (2019)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">writexl</td>
 <td align="left">1.5.0</td>
 <td align="left"><span class="citation">Ooms (2024)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">RStudio</td>
 <td align="left">2024.4.1.748</td>
 <td align="left"><span class="citation">Posit team (2024)</span></td>
@@ -2165,10 +1973,18 @@ https://www.r-project.org/conferences/DSC-2003/Proceedings/. <a href="https://ww
 ———. 2023. <em><span class="nocase">R.utils</span>: Various Programming
 Utilities</em>. <a href="https://CRAN.R-project.org/package=R.utils">https://CRAN.R-project.org/package=R.utils</a>.
 </div>
+<div id="ref-doBy" class="csl-entry">
+Højsgaard, Søren, and Ulrich Halekoh. 2024. <em><span class="nocase">doBy</span>: Groupwise Statistics, LSmeans, Linear
+Estimates, Utilities</em>. <a href="https://CRAN.R-project.org/package=doBy">https://CRAN.R-project.org/package=doBy</a>.
+</div>
 <div id="ref-writexl" class="csl-entry">
 Ooms, Jeroen. 2024. <em><span class="nocase">writexl</span>: Export Data
 Frames to Excel <span>“<span class="nocase">xlsx</span>”</span>
 Format</em>. <a href="https://CRAN.R-project.org/package=writexl">https://CRAN.R-project.org/package=writexl</a>.
+</div>
+<div id="ref-patchwork" class="csl-entry">
+Pedersen, Thomas Lin. 2024. <em><span class="nocase">patchwork</span>:
+The Composer of Plots</em>. <a href="https://CRAN.R-project.org/package=patchwork">https://CRAN.R-project.org/package=patchwork</a>.
 </div>
 <div id="ref-rstudio" class="csl-entry">
 Posit team. 2024. <em><span>RStudio</span>: Integrated Development
@@ -2182,6 +1998,10 @@ Statistical Computing. <a href="https://www.R-project.org/">https://www.R-projec
 <div id="ref-grateful" class="csl-entry">
 Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023. <em><span class="nocase">grateful</span>: Facilitate Citation of r Packages</em>.
 <a href="https://pakillo.github.io/grateful/">https://pakillo.github.io/grateful/</a>.
+</div>
+<div id="ref-ggrepel" class="csl-entry">
+Slowikowski, Kamil. 2024. <em><span class="nocase">ggrepel</span>:
+Automatically Position Non-Overlapping Text Labels with <span>“<span class="nocase">ggplot2</span>”</span></em>. <a href="https://CRAN.R-project.org/package=ggrepel">https://CRAN.R-project.org/package=ggrepel</a>.
 </div>
 <div id="ref-tidyverse" class="csl-entry">
 Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy

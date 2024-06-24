@@ -2,7 +2,7 @@ Import dataset from the surface texture analysis for the ISEA use-wear
 project
 ================
 Ivan Calandra
-2024-06-24 11:59:11 CEST
+2024-06-24 14:02:08 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -16,7 +16,8 @@ Ivan Calandra
   - [Extract units](#extract-units)
   - [Split column ‘Name’](#split-column-name)
   - [Split column ‘Specimen’](#split-column-specimen)
-  - [Add column with sample ID](#add-column-with-sample-id)
+  - [Add columns with sample ID and bamboo
+    species](#add-columns-with-sample-id-and-bamboo-species)
   - [Keep only numerical parts in columns “Location” and
     “Strokes”](#keep-only-numerical-parts-in-columns-location-and-strokes)
   - [Convert all parameter variables to
@@ -340,29 +341,27 @@ STA_keep[c("Chert_type", "Chert_tool")] <- STA_keep$Specimen %>%
                                            str_split("(?<=[A-Z]{1})", simplify = TRUE)
 ```
 
-## Add column with sample ID
+## Add columns with sample ID and bamboo species
 
 ``` r
-# Create a data.frame with correspondence between chert type, chert tool and sample ID
-sample_ID <- data.frame(Sample = paste0("ISEA-EX", 1:12), 
-                        Chert_type = rep(c("A", "B"), times = 6),
-                        Chert_tool = rep(1:6, each = 2))
+# Load Weights dataset
+weights <- loadObject(paste0(dir_out, "/ISEA_use-wear_Weights.Rbin"))
 
 # Merge the data.frames by chert type and chert tool
-STA_keep_ID <- merge(STA_keep, sample_ID, by = c("Chert_type", "Chert_tool"))
+STA_keep_ID_bamb <- merge(STA_keep, weights[1:4], by = c("Chert_type", "Chert_tool"))
 ```
 
 ## Keep only numerical parts in columns “Location” and “Strokes”
 
 ``` r
-STA_keep_ID$Location <- gsub("loc", "", STA_keep_ID$Location)
-STA_keep_ID$Strokes <- factor(gsub("strokes", "", STA_keep_ID$Strokes))
+STA_keep_ID_bamb$Location <- gsub("loc", "", STA_keep_ID_bamb$Location)
+STA_keep_ID_bamb$Strokes <- factor(gsub("strokes", "", STA_keep_ID_bamb$Strokes))
 ```
 
 ## Convert all parameter variables to numeric
 
 ``` r
-STA_keep_ID <- type_convert(STA_keep_ID)
+STA_keep_ID_bamb <- type_convert(STA_keep_ID_bamb)
 ```
 
 ## NMP ratios
@@ -377,7 +376,8 @@ All seems good.
 ## Re-order columns and add units as comment
 
 ``` r
-STA_final <- select(STA_keep_ID, Sample, Chert_type, Chert_tool, Objective:Strokes, NMP:NewEplsar)
+STA_final <- select(STA_keep_ID_bamb, Sample, Chert_type, Chert_tool, Bamboo_sp, 
+                    Objective:Strokes, NMP:NewEplsar)
 comment(STA_final) <- STA_units
 ```
 
@@ -389,10 +389,11 @@ Type `comment(STA_final)` to check the units of the parameters.
 str(STA_final)
 ```
 
-    'data.frame':   96 obs. of  43 variables:
+    'data.frame':   96 obs. of  44 variables:
      $ Sample                  : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
      $ Chert_type              : chr  "A" "A" "A" "A" ...
      $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
+     $ Bamboo_sp               : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
      $ Objective               : chr  "20x-0.70" "20x-0.70" "20x-0.70" "20x-0.70" ...
      $ Side                    : chr  "dorsal" "dorsal" "dorsal" "dorsal" ...
      $ Location                : num  1 1 2 2 1 1 2 2 1 1 ...
@@ -440,55 +441,62 @@ str(STA_final)
 head(STA_final)
 ```
 
-        Sample Chert_type Chert_tool Objective    Side Location Strokes       NMP
-    1 ISEA-EX1          A          1  20x-0.70  dorsal        1       0 0.1999580
-    2 ISEA-EX1          A          1  20x-0.70  dorsal        1    2000 0.1999580
-    3 ISEA-EX1          A          1  20x-0.70  dorsal        2       0 0.1999580
-    4 ISEA-EX1          A          1  20x-0.70  dorsal        2    2000 0.1997480
-    5 ISEA-EX1          A          1  20x-0.70 ventral        1       0 0.1997480
-    6 ISEA-EX1          A          1  20x-0.70 ventral        1    2000 0.1995379
-            Sq        Ssk      Sku        Sp        Sv       Sz       Sa       Smr
-    1 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880 280.9127 11.763569
-    2 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532 137.9229 97.772232
-    3 471.9081  0.1782349 3.617312 1680.0238 1554.4562 3234.480 363.2579  8.120664
-    4 341.9963 -0.4827666 3.993075  971.5410 1339.2310 2310.772 257.0249 57.824111
-    5 494.3200  0.1601631 3.540429 1865.5175 1782.4093 3647.927 383.6674  4.769773
-    6 750.0697 -0.1556915 3.433134 2298.9824 2423.0967 4722.079 581.3924  4.111890
-           Smc       Sxp      Sal       Str        Std       Ssw       Sdq      Sdr
-    1 457.6620  635.0391 4.873127 0.7581494  12.989301 0.4248838 0.2997760 4.213511
-    2 203.5721  538.2645 5.211629 0.5687682   3.488485 0.4248838 0.1077379 0.567455
-    3 610.6844  877.8419 4.882320 0.7032365 122.238224 0.4248838 0.3679264 6.192882
-    4 397.9082  825.3227 5.274232 0.6848816 175.998406 0.4248838 0.1962781 1.828874
-    5 599.8546  921.5167 4.548254 0.3812570  70.500470 0.4248838 0.3484251 5.459936
-    6 867.8968 1656.4436 5.219970        NA  73.747646 0.4248838 0.3764940 5.751873
-               Vm        Vv         Vmp       Vmc       Vvc        Vvv
-    1 0.020655078 0.4783037 0.020655078 0.3087765 0.4420467 0.03625709
-    2 0.008262461 0.2118332 0.008262461 0.1410964 0.1781942 0.03363900
-    3 0.027908316 0.6385740 0.027908316 0.3880665 0.5852113 0.05336270
-    4 0.017438165 0.4153293 0.017438165 0.2731001 0.3623892 0.05294018
-    5 0.031852956 0.6316956 0.031852956 0.4271848 0.5768188 0.05487685
-    6 0.043690817 0.9116036 0.043690817 0.6312824 0.8100546 0.10154900
-      Maximum.depth.of.furrows Mean.depth.of.furrows Mean.density.of.furrows
-    1                 1942.646              618.3156                4525.126
-    2                 1100.149              288.0931                3018.786
-    3                 2275.050              849.3013                4494.570
-    4                 1627.004              577.8517                3191.931
-    5                 2427.417              760.6523                4469.495
-    6                 3050.083             1078.4730                3565.619
-      First.direction Second.direction Third.direction Texture.isotropy       Asfc
-    1    8.557293e-03     135.02266890       153.55462        71.199627  9.4851127
-    2    1.799960e+02      44.98590072       134.99670        52.594359  0.8677973
-    3    1.350326e+02       0.01062171        89.98775        70.932914 13.8604793
-    4    8.999939e+01     135.01492680       179.98965        68.889231  2.8641345
-    5    7.146393e+01      63.47858619        44.98322        43.275061 11.2865846
-    6    7.152644e+01      63.52035976        89.99952         9.334622  8.1544882
-          Smfc     HAsfc9   HAsfc81       epLsar  NewEplsar
-    1 1.124339 0.11542648 0.3151333 0.0015082547 0.01833031
-    2 1.993686 0.36432069 1.3382342 0.0023296235 0.01866927
-    3 1.124339 0.08100962 0.2650551 0.0009464416 0.01791761
-    4 3.767525 0.45631532 0.9349030 0.0013657628 0.01812746
-    5 1.276960 0.15097810 0.3349801 0.0036062641 0.01742323
-    6 1.993686 0.41098424 0.8871420 0.0058686109 0.01564744
+        Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
+    1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
+    2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
+    3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
+    4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
+    5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+    6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+      Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
+    1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
+    2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532
+    3       0 0.1999580 471.9081  0.1782349 3.617312 1680.0238 1554.4562 3234.480
+    4    2000 0.1997480 341.9963 -0.4827666 3.993075  971.5410 1339.2310 2310.772
+    5       0 0.1997480 494.3200  0.1601631 3.540429 1865.5175 1782.4093 3647.927
+    6    2000 0.1995379 750.0697 -0.1556915 3.433134 2298.9824 2423.0967 4722.079
+            Sa       Smr      Smc       Sxp      Sal       Str        Std       Ssw
+    1 280.9127 11.763569 457.6620  635.0391 4.873127 0.7581494  12.989301 0.4248838
+    2 137.9229 97.772232 203.5721  538.2645 5.211629 0.5687682   3.488485 0.4248838
+    3 363.2579  8.120664 610.6844  877.8419 4.882320 0.7032365 122.238224 0.4248838
+    4 257.0249 57.824111 397.9082  825.3227 5.274232 0.6848816 175.998406 0.4248838
+    5 383.6674  4.769773 599.8546  921.5167 4.548254 0.3812570  70.500470 0.4248838
+    6 581.3924  4.111890 867.8968 1656.4436 5.219970        NA  73.747646 0.4248838
+            Sdq      Sdr          Vm        Vv         Vmp       Vmc       Vvc
+    1 0.2997760 4.213511 0.020655078 0.4783037 0.020655078 0.3087765 0.4420467
+    2 0.1077379 0.567455 0.008262461 0.2118332 0.008262461 0.1410964 0.1781942
+    3 0.3679264 6.192882 0.027908316 0.6385740 0.027908316 0.3880665 0.5852113
+    4 0.1962781 1.828874 0.017438165 0.4153293 0.017438165 0.2731001 0.3623892
+    5 0.3484251 5.459936 0.031852956 0.6316956 0.031852956 0.4271848 0.5768188
+    6 0.3764940 5.751873 0.043690817 0.9116036 0.043690817 0.6312824 0.8100546
+             Vvv Maximum.depth.of.furrows Mean.depth.of.furrows
+    1 0.03625709                 1942.646              618.3156
+    2 0.03363900                 1100.149              288.0931
+    3 0.05336270                 2275.050              849.3013
+    4 0.05294018                 1627.004              577.8517
+    5 0.05487685                 2427.417              760.6523
+    6 0.10154900                 3050.083             1078.4730
+      Mean.density.of.furrows First.direction Second.direction Third.direction
+    1                4525.126    8.557293e-03     135.02266890       153.55462
+    2                3018.786    1.799960e+02      44.98590072       134.99670
+    3                4494.570    1.350326e+02       0.01062171        89.98775
+    4                3191.931    8.999939e+01     135.01492680       179.98965
+    5                4469.495    7.146393e+01      63.47858619        44.98322
+    6                3565.619    7.152644e+01      63.52035976        89.99952
+      Texture.isotropy       Asfc     Smfc     HAsfc9   HAsfc81       epLsar
+    1        71.199627  9.4851127 1.124339 0.11542648 0.3151333 0.0015082547
+    2        52.594359  0.8677973 1.993686 0.36432069 1.3382342 0.0023296235
+    3        70.932914 13.8604793 1.124339 0.08100962 0.2650551 0.0009464416
+    4        68.889231  2.8641345 3.767525 0.45631532 0.9349030 0.0013657628
+    5        43.275061 11.2865846 1.276960 0.15097810 0.3349801 0.0036062641
+    6         9.334622  8.1544882 1.993686 0.41098424 0.8871420 0.0058686109
+       NewEplsar
+    1 0.01833031
+    2 0.01866927
+    3 0.01791761
+    4 0.01812746
+    5 0.01742323
+    6 0.01564744
 
 ------------------------------------------------------------------------
 
