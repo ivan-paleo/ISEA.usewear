@@ -1,7 +1,7 @@
 Plot Smarttester’s sensor data for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 11:57:37 CEST
+2024-06-24 17:39:27 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -327,7 +327,7 @@ print(p_every20)
 
 ``` r
 # Save list of plots
-ggsave(filename = "ISEA_use-wear_plot-Smarttester_all-strokes.pdf", 
+ggsave(filename = "ISEA_use-wear_Smarttester-plots_all-strokes.pdf", 
        path = dir_plots, width = 190, units = "mm", 
        plot = marrangeGrob(p_every20, nrow = 1, ncol = 1, top = NULL))
 ```
@@ -424,7 +424,7 @@ print(p_1to50)
 
 ``` r
 # Save list of plots
-ggsave(filename = "ISEA_use-wear_plot-Smarttester_50strokes.pdf", 
+ggsave(filename = "ISEA_use-wear_Smarttester-plots_50strokes.pdf", 
        path = dir_plots, width = 190, units = "mm", 
        plot = marrangeGrob(p_1to50, nrow = 1, ncol = 1, top = NULL))
 ```

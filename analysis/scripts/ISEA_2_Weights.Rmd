@@ -234,12 +234,17 @@ stats_chert[1:2]
 # Compute summary statistics based on Bamboo_sp
 stats_bamboo <- summaryBy(. ~ Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
 stats_bamboo[1:2]
+
+# Compute summary statistics based on Chert_type and Bamboo_sp
+stats_chert_bamboo <- summaryBy(. ~ Chert_type + Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_chert_bamboo[1:3]
 ```
 
 
 ## Save as XLSX
 ```{r}
-write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo), 
+write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo,
+                "Chert+Bamboo" = stats_chert_bamboo), 
            path = paste0(dir_stats, "/ISEA_use-wear_Weights-stats.xlsx"))
 ```
 

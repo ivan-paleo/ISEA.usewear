@@ -181,7 +181,7 @@ for (i in names(p_every20)) {
 print(p_every20)
 
 # Save list of plots
-ggsave(filename = "ISEA_use-wear_plot-Smarttester_all-strokes.pdf", 
+ggsave(filename = "ISEA_use-wear_Smarttester-plots_all-strokes.pdf", 
        path = dir_plots, width = 190, units = "mm", 
        plot = marrangeGrob(p_every20, nrow = 1, ncol = 1, top = NULL))
 ```
@@ -220,7 +220,7 @@ for (i in names(p_1to50)) {
 print(p_1to50)
 
 # Save list of plots
-ggsave(filename = "ISEA_use-wear_plot-Smarttester_50strokes.pdf", 
+ggsave(filename = "ISEA_use-wear_Smarttester-plots_50strokes.pdf", 
        path = dir_plots, width = 190, units = "mm", 
        plot = marrangeGrob(p_1to50, nrow = 1, ncol = 1, top = NULL))
 ```

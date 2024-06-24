@@ -1,0 +1,193 @@
+---
+title: "Plots for the ISEA use-wear dataset"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 4
+    html_preview: false
+bibliography: ISEA_3c_STA-plots.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE)
+```
+
+
+---
+
+
+# Goal of the script
+The script plots all STA variables for the ISEA use-wear dataset.   
+
+```{r}
+dir_in  <- "analysis/derived_data"
+dir_plots <- "analysis/plots"
+```
+
+Input Rbin data file must be located in "`r paste0("./", dir_in)`".  
+Plots will be saved in "`r paste0("./", dir_plots)`".
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Load packages
+```{r}
+library(factoextra)
+library(ggplot2)
+library(grateful)
+library(gridExtra)
+library(knitr)
+library(R.utils)
+library(RColorBrewer)
+library(rmarkdown)
+library(tidyverse)
+```
+
+
+---
+
+
+# Read in data
+```{r}
+STA <- list.files(dir_in, pattern = "STA\\.Rbin$", full.names = TRUE) %>% 
+       loadObject()
+str(STA)
+head(STA)
+```
+
+
+---
+
+
+# Plot each surface parameter in a boxplot
+## Define variables
+Here we define which columns are used for the boxplots.  
+
+```{r}
+# Columns to be used to group on the x-axis
+x_var <- "Strokes"
+
+# Columns to be used on the y-axis
+y_var <- data.frame(param = colnames(STA)[10:44], type = NA)
+y_var[y_var$param %in% c("Sq", "Ssk", "Sku", "Sp", "Sv", "Sz", "Sa"), "type"] <- "ISO height"
+y_var[grepl("^V[a-z]{1,2}", y_var$param), "type"] <- "ISO volume"
+y_var[y_var$param %in% c("Smr", "Smc", "Sxp", "Sal", "Str", "Std", "Ssw", "Sdq", "Sdr"), "type"] <- "ISO other"
+y_var[grepl("furrows|direction|isotropy", y_var$param), "type"] <- "Furrow, direction and isotropy parameters"
+y_var[grepl("Asfc|(?i)eplsar|Smfc", y_var$param), "type"] <- "SSFA"
+y_var$type <- factor(y_var$type)
+
+# colors
+grp_colors <- "Chert_type"
+color_name_leg <- gsub("_", " ", grp_colors)
+
+# shapes
+grp_shapes <- "Bamboo_sp"
+shape_name_leg <- gsub("_", " ", grp_shapes)
+```
+
+
+## Create lists to receive the plots
+```{r}
+p_box <- vector(mode = "list", length = length(levels(y_var$type)))
+names(p_box) <- levels(y_var$type)
+```
+
+
+## Plots 
+TO DO: find a way to have less points to plot per facet.
+
+
+```{r}
+# Plot for every set of parameters
+for (i in names(p_box)) {
+  
+  # Subset parameter names by type
+  y_var_i <- y_var[y_var$type == i, "param"]
+  
+  # Select columns that will be used in the plotting
+  data_i <- select(STA, all_of(c("Sample", "Bamboo_sp", "Side", "Location", 
+                                 x_var, y_var_i, grp_colors, grp_shapes))) %>%
+  
+            # Pivot to longer format for facet plots
+            pivot_longer(all_of(y_var_i), names_to = "Parameter", values_to = "Value")
+  
+  # Plot        # Define aesthetics
+  p_box[[i]] <- ggplot(data_i, aes(x = .data[[x_var]], y = Value,
+                                   color = .data[[grp_colors]], shape = .data[[grp_shapes]])) +
+
+                # Add points
+                geom_point(size = 2) +
+    
+                # Add lines to connect points with identical"Sample ID
+                geom_line(linewidth = 0.5, aes(group = interaction(Sample, Bamboo_sp, Side, Location)), 
+                          show.legend = FALSE) +
+    
+                # Facet plot by 'Parameter' (= 'y_var_i')
+                facet_wrap(~ Parameter, scales = "free_y") +
+    
+                # Light theme
+                theme_classic() +
+  
+                # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
+                scale_color_brewer(palette = 'Set2') +
+  
+                # Remove xlab and use the clean name for the legend
+                labs(y = NULL, title = i, color = color_name_leg, shape = shape_name_leg)
+
+}
+
+# Print plot
+print(p_box)
+
+# Save list of plots
+ggsave(filename = "ISEA_use-wear_STA-plots.pdf", 
+       path = dir_plots, width = 190, units = "mm", 
+       plot = marrangeGrob(p_box, nrow = 1, ncol = 1, top = NULL))
+```
+
+
+---
+
+
+# PCA
+TO DO
+
+
+---
+
+
+# sessionInfo()
+
+```{r}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_3c_STA-plots")
+knitr::kable(pkgs_cite)
+```
+
+
+## References
+

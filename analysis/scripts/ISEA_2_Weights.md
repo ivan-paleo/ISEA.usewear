@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 14:31:20 CEST
+2024-06-24 15:10:17 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -240,6 +240,8 @@ plot(p_all)
 ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_Weights-plots.pdf"), width = 190, unit = "mm")
 ```
 
+    Error in grDevices::pdf(file = filename, ..., version = version): cannot open file 'analysis/plots//ISEA_use-wear_Weights-plots.pdf'
+
 ------------------------------------------------------------------------
 
 # Summary statistics
@@ -289,10 +291,23 @@ stats_bamboo[1:2]
     1   Bambusa blumeana               6
     2 Schizostachum lima               6
 
+``` r
+# Compute summary statistics based on Chert_type and Bamboo_sp
+stats_chert_bamboo <- summaryBy(. ~ Chert_type + Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+stats_chert_bamboo[1:3]
+```
+
+      Chert_type          Bamboo_sp Weight_before.n
+    1          A   Bambusa blumeana               3
+    2          A Schizostachum lima               3
+    3          B   Bambusa blumeana               3
+    4          B Schizostachum lima               3
+
 ## Save as XLSX
 
 ``` r
-write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo), 
+write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo,
+                "Chert+Bamboo" = stats_chert_bamboo), 
            path = paste0(dir_stats, "/ISEA_use-wear_Weights-stats.xlsx"))
 ```
 
