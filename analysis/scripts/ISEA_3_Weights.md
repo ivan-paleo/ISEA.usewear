@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 11:59:42 CEST
+2024-06-24 12:33:28 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -18,6 +18,11 @@ Ivan Calandra
   - [Weight differences](#weight-differences)
   - [Combine and plot plots](#combine-and-plot-plots)
   - [Save plot](#save-plot)
+- [Summary statistics](#summary-statistics)
+  - [Create function to compute the statistics at
+    once](#create-function-to-compute-the-statistics-at-once)
+  - [Compute summary statistics](#compute-summary-statistics)
+  - [Save as XLSX](#save-as-xlsx)
 - [sessionInfo()](#sessioninfo)
 - [Cite R packages used](#cite-r-packages-used)
   - [References](#references)
@@ -32,17 +37,20 @@ The script will:
 
 1.  Read in the original CSV-file  
 2.  Save data as Rbin and XLSX  
-3.  Plot
+3.  Plot  
+4.  Compute summary statistics
 
 ``` r
 dir_in <- "analysis/raw_data/"
 dir_data <- "analysis/derived_data/"
 dir_plots <- "analysis/plots/"
+dir_stats <- "analysis/stats/"
 ```
 
 Input CSV file file must be located in “./analysis/raw_data/”.  
-Plots will be saved in “./analysis/plots/”. Datasets will be saved in
-“./analysis/derived_data/”.
+Plots will be saved in “./analysis/plots/”. Processed datasets will be
+saved in “./analysis/derived_data/”. Summary statistics will be saved in
+“./analysis/stats/”.
 
 The knit directory for this script is the project directory.
 
@@ -51,6 +59,7 @@ The knit directory for this script is the project directory.
 # Load packages
 
 ``` r
+library(doBy)
 library(ggplot2)
 library(ggrepel)
 library(grateful)
@@ -72,10 +81,11 @@ weights <- read.csv(file_in, check.names = FALSE)
 str(weights)
 ```
 
-    'data.frame':   12 obs. of  5 variables:
+    'data.frame':   12 obs. of  6 variables:
      $ Sample            : chr  "ISEA-EX1" "ISEA-EX2" "ISEA-EX3" "ISEA-EX4" ...
      $ Chert_type        : chr  "A" "B" "A" "B" ...
      $ Chert_tool        : int  1 1 2 2 3 3 4 4 5 5 ...
+     $ Bamboo_sp         : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
      $ Weight_before_[mg]: num  30.1 21.5 28.6 16.7 16.7 ...
      $ Weight_after_[mg] : num  30 21.5 28.6 16.7 16.7 ...
 
@@ -83,13 +93,20 @@ str(weights)
 head(weights)
 ```
 
-        Sample Chert_type Chert_tool Weight_before_[mg] Weight_after_[mg]
-    1 ISEA-EX1          A          1              30.07             30.00
-    2 ISEA-EX2          B          1              21.52             21.50
-    3 ISEA-EX3          A          2              28.65             28.62
-    4 ISEA-EX4          B          2              16.69             16.67
-    5 ISEA-EX5          A          3              16.69             16.66
-    6 ISEA-EX6          B          3              10.25             10.04
+        Sample Chert_type Chert_tool        Bamboo_sp Weight_before_[mg]
+    1 ISEA-EX1          A          1 Bambusa blumeana              30.07
+    2 ISEA-EX2          B          1 Bambusa blumeana              21.52
+    3 ISEA-EX3          A          2 Bambusa blumeana              28.65
+    4 ISEA-EX4          B          2 Bambusa blumeana              16.69
+    5 ISEA-EX5          A          3 Bambusa blumeana              16.69
+    6 ISEA-EX6          B          3 Bambusa blumeana              10.25
+      Weight_after_[mg]
+    1             30.00
+    2             21.50
+    3             28.62
+    4             16.67
+    5             16.66
+    6             10.04
 
 ------------------------------------------------------------------------
 
@@ -98,21 +115,21 @@ head(weights)
 ## As XLSX
 
 ``` r
-write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_weights.xlsx"))
+write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_Weights.xlsx"))
 ```
 
 ## As Rbin
 
 ``` r
-saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_weights.Rbin"))
+saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_Weights.Rbin"))
 ```
 
-Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into
+Rbin files (e.g. `ISEA_use-wear_Weights.Rbin`) can be easily read into
 an R object (e.g. `rbin_data`) using the following code:
 
 ``` r
 library(R.utils)
-rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
+rbin_data <- loadObject("ISEA_use-wear_Weights.Rbin")
 ```
 
 ------------------------------------------------------------------------
@@ -131,15 +148,21 @@ weights_long <-  weights %>%
 ## Format column names for nice plotting
 
 ``` r
-color_name <- grep("type", names(weights_long), value = TRUE)
+# Color
+color_name <- "Chert_type"
 color_name_leg <- gsub("_", " ", color_name)
+
+# Shapes
+shape_name <- "Bamboo_sp"
+shape_name_leg <- gsub("_", " ", shape_name)
 ```
 
 ## Absolute weights
 
 ``` r
              # Define plot
-p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
+p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], 
+                                      color = .data[[color_name]], shape = .data[[shape_name]])) +
              
              # Add points
              geom_point(size = 3) +
@@ -162,7 +185,7 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], col
              scale_color_brewer(palette = 'Set2') +
   
              # Remove xlab and use the clean name for the legend
-             labs(x = NULL, color = color_name_leg)
+             labs(x = NULL, color = color_name_leg, shape = shape_name_leg)
 ```
 
 ## Weight differences
@@ -179,7 +202,8 @@ plotted in order to only show the magnitude of the difference.
 weights <- mutate(weights, Weight_diff = abs(`Weight_after_[mg]` - `Weight_before_[mg]`))
 
           # Define plot
-p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = .data[[color_name]])) +
+p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, 
+                              color = .data[[color_name]], shape = .data[[shape_name]])) +
           
           # Add points
           geom_point(size = 3) +
@@ -198,7 +222,7 @@ p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = 
           scale_color_brewer(palette = 'Set2') +
   
           # Remove xlab and use the clean name for the legend
-          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg)
+          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg, shape = shape_name_leg)
 ```
 
 ## Combine and plot plots
@@ -213,7 +237,51 @@ plot(p_all)
 ## Save plot
 
 ``` r
-ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_plot-weights.pdf"), width = 190, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_Weights-plots.pdf"), width = 190, unit = "mm")
+```
+
+------------------------------------------------------------------------
+
+# Summary statistics
+
+## Create function to compute the statistics at once
+
+``` r
+nminmaxmeanmedsd <- function(x){
+    y <- x[!is.na(x)]     # Exclude NAs
+    n_test <- length(y)   # Sample size (n)
+    min_test <- min(y)    # Minimum
+    max_test <- max(y)    # Maximum
+    mean_test <- mean(y)  # Mean
+    med_test <- median(y) # Median
+    sd_test <- sd(y)      # Standard deviation
+    out <- c(n_test, min_test, max_test, mean_test, med_test, sd_test) # Concatenate
+    names(out) <- c("n", "min", "max", "mean", "median", "sd")         # Name values
+    return(out)                                                        # Object to return
+}
+```
+
+## Compute summary statistics
+
+``` r
+# Remove unit from headers
+names(weights) <- gsub("_\\[mg\\]", "", names(weights))
+
+# Exclude Chert_tool column from data
+weights_sel <- select(weights, !Chert_tool)
+
+# Compute summary statistics based on Chert_type
+stats_chert <- summaryBy(. ~ Chert_type, data = weights_sel, FUN = nminmaxmeanmedsd)
+
+# Compute summary statistics based on Bamboo_sp
+stats_bamboo <- summaryBy(. ~ Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+```
+
+## Save as XLSX
+
+``` r
+write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo), 
+           path = paste0(dir_stats, "/ISEA_use-wear_Weights-stats.xlsx"))
 ```
 
 ------------------------------------------------------------------------
@@ -249,21 +317,28 @@ sessionInfo()
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
      [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
     [13] R.oo_1.26.0       R.methodsS3_1.8.2 patchwork_1.2.0   knitr_1.47       
-    [17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1    
+    [17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.21      
 
     loaded via a namespace (and not attached):
-     [1] sass_0.4.9         utf8_1.2.4         generics_0.1.3     stringi_1.8.4     
-     [5] hms_1.1.3          digest_0.6.35      magrittr_2.0.3     RColorBrewer_1.1-3
-     [9] evaluate_0.23      grid_4.4.0         timechange_0.3.0   fastmap_1.2.0     
-    [13] rprojroot_2.0.4    jsonlite_1.8.8     fansi_1.0.6        scales_1.3.0      
-    [17] textshaping_0.4.0  jquerylib_0.1.4    cli_3.6.2          rlang_1.1.4       
-    [21] munsell_0.5.1      withr_3.0.0        cachem_1.1.0       yaml_2.3.8        
-    [25] tools_4.4.0        tzdb_0.4.0         colorspace_2.1-0   vctrs_0.6.5       
-    [29] R6_2.5.1           lifecycle_1.0.4    ragg_1.3.2         pkgconfig_2.0.3   
-    [33] pillar_1.9.0       bslib_0.7.0        gtable_0.3.5       glue_1.7.0        
-    [37] Rcpp_1.0.12        systemfonts_1.1.0  highr_0.11         xfun_0.44         
-    [41] tidyselect_1.2.1   rstudioapi_0.16.0  farver_2.1.2       htmltools_0.5.8.1 
-    [45] labeling_0.4.3     compiler_4.4.0    
+     [1] gtable_0.3.5          xfun_0.44             bslib_0.7.0          
+     [4] lattice_0.22-6        tzdb_0.4.0            vctrs_0.6.5          
+     [7] tools_4.4.0           generics_0.1.3        fansi_1.0.6          
+    [10] highr_0.11            pkgconfig_2.0.3       Matrix_1.7-0         
+    [13] RColorBrewer_1.1-3    lifecycle_1.0.4       farver_2.1.2         
+    [16] compiler_4.4.0        textshaping_0.4.0     microbenchmark_1.4.10
+    [19] munsell_0.5.1         htmltools_0.5.8.1     sass_0.4.9           
+    [22] yaml_2.3.8            pillar_1.9.0          jquerylib_0.1.4      
+    [25] MASS_7.3-60.2         cachem_1.1.0          boot_1.3-30          
+    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.35        
+    [31] stringi_1.8.4         labeling_0.4.3        cowplot_1.1.3        
+    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.0           
+    [37] colorspace_2.1-0      cli_3.6.2             magrittr_2.0.3       
+    [40] utf8_1.2.4            broom_1.0.6           withr_3.0.0          
+    [43] scales_1.3.0          backports_1.5.0       timechange_0.3.0     
+    [46] modelr_0.1.11         ragg_1.3.2            hms_1.1.3            
+    [49] evaluate_0.23         rlang_1.1.4           Rcpp_1.0.12          
+    [52] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
+    [55] R6_2.5.1              systemfonts_1.1.0    
 
 ------------------------------------------------------------------------
 
@@ -272,6 +347,7 @@ sessionInfo()
 | Package     | Version      | Citation                                                                                      |
 |:------------|:-------------|:----------------------------------------------------------------------------------------------|
 | base        | 4.4.0        | R Core Team (2024)                                                                            |
+| doBy        | 4.6.21       | Højsgaard and Halekoh (2024)                                                                  |
 | ggrepel     | 0.9.5        | Slowikowski (2024)                                                                            |
 | grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
@@ -326,6 +402,14 @@ https://www.r-project.org/conferences/DSC-2003/Proceedings/.
 
 ———. 2023. *<span class="nocase">R.utils</span>: Various Programming
 Utilities*. <https://CRAN.R-project.org/package=R.utils>.
+
+</div>
+
+<div id="ref-doBy" class="csl-entry">
+
+Højsgaard, Søren, and Ulrich Halekoh. 2024.
+*<span class="nocase">doBy</span>: Groupwise Statistics, LSmeans, Linear
+Estimates, Utilities*. <https://CRAN.R-project.org/package=doBy>.
 
 </div>
 

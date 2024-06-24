@@ -1,13 +1,13 @@
-Sample,Chert_type,Chert_tool,Weight_before_[mg],Weight_after_[mg]
-ISEA-EX1,A,1,30.07,30.00
-ISEA-EX2,B,1,21.52,21.50
-ISEA-EX3,A,2,28.65,28.62
-ISEA-EX4,B,2,16.69,16.67
-ISEA-EX5,A,3,16.69,16.66
-ISEA-EX6,B,3,10.25,10.04
-ISEA-EX7,A,4,18.25,18.24
-ISEA-EX8,B,4,13.49,13.48
-ISEA-EX9,A,5,24.6,24.44
-ISEA-EX10,B,5,17.04,17.00
-ISEA-EX11,A,6,15.32,15.31
-ISEA-EX12,B,6,16.76,16.74
+Sample,Chert_type,Chert_tool,Bamboo_sp,Weight_before_[mg],Weight_after_[mg]
+ISEA-EX1,A,1,Bambusa blumeana,30.07,30
+ISEA-EX2,B,1,Bambusa blumeana,21.52,21.5
+ISEA-EX3,A,2,Bambusa blumeana,28.65,28.62
+ISEA-EX4,B,2,Bambusa blumeana,16.69,16.67
+ISEA-EX5,A,3,Bambusa blumeana,16.69,16.66
+ISEA-EX6,B,3,Bambusa blumeana,10.25,10.04
+ISEA-EX7,A,4,Schizostachum lima,18.25,18.24
+ISEA-EX8,B,4,Schizostachum lima,13.49,13.48
+ISEA-EX9,A,5,Schizostachum lima,24.6,24.44
+ISEA-EX10,B,5,Schizostachum lima,17.04,17
+ISEA-EX11,A,6,Schizostachum lima,15.32,15.31
+ISEA-EX12,B,6,Schizostachum lima,16.76,16.74

@@ -32,16 +32,18 @@ The script will:
 
 1. Read in the original CSV-file  
 2. Save data as Rbin and XLSX  
-3. Plot 
+3. Plot  
+4. Compute summary statistics
 
 ```{r}
 dir_in <- "analysis/raw_data/"
 dir_data <- "analysis/derived_data/"
 dir_plots <- "analysis/plots/"
+dir_stats <- "analysis/stats/"
 ```
 
 Input CSV file file must be located in "`r paste0("./", dir_in)`".  
-Plots will be saved in "`r paste0("./", dir_plots)`". Datasets will be saved in "`r paste0("./", dir_data)`". 
+Plots will be saved in "`r paste0("./", dir_plots)`". Processed datasets will be saved in "`r paste0("./", dir_data)`".  Summary statistics will be saved in "`r paste0("./", dir_stats)`".
 
 The knit directory for this script is the project directory.
 
@@ -51,6 +53,7 @@ The knit directory for this script is the project directory.
 
 # Load packages
 ```{r}
+library(doBy)
 library(ggplot2)
 library(ggrepel)
 library(grateful)
@@ -81,18 +84,18 @@ head(weights)
 # Save data
 ## As XLSX
 ```{r}
-write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_weights.xlsx"))
+write_xlsx(weights, path = paste0(dir_data, "/ISEA_use-wear_Weights.xlsx"))
 ```
 
 ## As Rbin
 ```{r}
-saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_weights.Rbin"))
+saveObject(weights, file = paste0(dir_data, "/ISEA_use-wear_Weights.Rbin"))
 ```
 
-Rbin files (e.g. `ISEA_use-wear_weights.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
+Rbin files (e.g. `ISEA_use-wear_Weights.Rbin`) can be easily read into an R object (e.g. `rbin_data`) using the following code:
 ```{r, eval = FALSE}
 library(R.utils)
-rbin_data <- loadObject("ISEA_use-wear_weights.Rbin")
+rbin_data <- loadObject("ISEA_use-wear_Weights.Rbin")
 ```
 
 
@@ -110,14 +113,20 @@ weights_long <-  weights %>%
 
 ## Format column names for nice plotting
 ```{r}
-color_name <- grep("type", names(weights_long), value = TRUE)
+# Color
+color_name <- "Chert_type"
 color_name_leg <- gsub("_", " ", color_name)
+
+# Shapes
+shape_name <- "Bamboo_sp"
+shape_name_leg <- gsub("_", " ", shape_name)
 ```
 
 ## Absolute weights
 ```{r}
              # Define plot
-p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], color = .data[[color_name]])) +
+p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], 
+                                      color = .data[[color_name]], shape = .data[[shape_name]])) +
              
              # Add points
              geom_point(size = 3) +
@@ -140,7 +149,7 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]], col
              scale_color_brewer(palette = 'Set2') +
   
              # Remove xlab and use the clean name for the legend
-             labs(x = NULL, color = color_name_leg)
+             labs(x = NULL, color = color_name_leg, shape = shape_name_leg)
 ```
 
 ## Weight differences
@@ -153,7 +162,8 @@ The difference is the weight after minus the weight before. Since all samples lo
 weights <- mutate(weights, Weight_diff = abs(`Weight_after_[mg]` - `Weight_before_[mg]`))
 
           # Define plot
-p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = .data[[color_name]])) +
+p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, 
+                              color = .data[[color_name]], shape = .data[[shape_name]])) +
           
           # Add points
           geom_point(size = 3) +
@@ -172,7 +182,7 @@ p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff, color = 
           scale_color_brewer(palette = 'Set2') +
   
           # Remove xlab and use the clean name for the legend
-          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg)
+          labs(x = NULL, y = "Weight difference [mg]",color = color_name_leg, shape = shape_name_leg)
 ```
 
 ## Combine and plot plots
@@ -183,7 +193,52 @@ plot(p_all)
 
 ## Save plot
 ```{r}
-ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_plot-weights.pdf"), width = 190, unit = "mm")
+ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_Weights-plots.pdf"), width = 190, unit = "mm")
+```
+
+
+---
+
+
+# Summary statistics
+
+## Create function to compute the statistics at once
+```{r}
+nminmaxmeanmedsd <- function(x){
+    y <- x[!is.na(x)]     # Exclude NAs
+    n_test <- length(y)   # Sample size (n)
+    min_test <- min(y)    # Minimum
+    max_test <- max(y)    # Maximum
+    mean_test <- mean(y)  # Mean
+    med_test <- median(y) # Median
+    sd_test <- sd(y)      # Standard deviation
+    out <- c(n_test, min_test, max_test, mean_test, med_test, sd_test) # Concatenate
+    names(out) <- c("n", "min", "max", "mean", "median", "sd")         # Name values
+    return(out)                                                        # Object to return
+}
+```
+
+
+## Compute summary statistics
+```{r}
+# Remove unit from headers
+names(weights) <- gsub("_\\[mg\\]", "", names(weights))
+
+# Exclude Chert_tool column from data
+weights_sel <- select(weights, !Chert_tool)
+
+# Compute summary statistics based on Chert_type
+stats_chert <- summaryBy(. ~ Chert_type, data = weights_sel, FUN = nminmaxmeanmedsd)
+
+# Compute summary statistics based on Bamboo_sp
+stats_bamboo <- summaryBy(. ~ Bamboo_sp, data = weights_sel, FUN = nminmaxmeanmedsd)
+```
+
+
+## Save as XLSX
+```{r}
+write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo), 
+           path = paste0(dir_stats, "/ISEA_use-wear_Weights-stats.xlsx"))
 ```
 
 
