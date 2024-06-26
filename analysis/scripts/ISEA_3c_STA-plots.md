@@ -1,7 +1,7 @@
 Plots for the ISEA use-wear dataset
 ================
 Ivan Calandra
-2024-06-26 10:55:41 CEST
+2024-06-26 14:46:44 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -331,6 +331,9 @@ for (i in names(p_box)) {
     
                 # Light theme
                 theme_classic() +
+    
+                # Italicize species names in legend
+                guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
     
                 # Reduce font size of the facet labels so that they fit in the box
                 theme(strip.text = element_text(size = 6)) +

@@ -186,6 +186,9 @@ for (i in names(p_box)) {
                 # Light theme
                 theme_classic() +
     
+                # Italicize species names in legend
+                guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
+    
                 # Reduce font size of the facet labels so that they fit in the box
                 theme(strip.text = element_text(size = 6)) +
   

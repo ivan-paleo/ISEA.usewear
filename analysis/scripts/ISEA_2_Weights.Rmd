@@ -141,6 +141,9 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]],
    
              # Light theme
              theme_classic() +
+
+             # Italicize species names in legend
+             guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
   
              # Reduce margins around the plot
              scale_x_discrete(expand = expansion(add = c(0.9, 0.1))) +
@@ -174,6 +177,9 @@ p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff,
   
           # Light theme
           theme_classic() +
+  
+          # Italicize species names in legend
+          guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
   
           # Reduce margins around the plot
           scale_x_discrete(expand = expansion(add = c(0.7, 0.05))) +

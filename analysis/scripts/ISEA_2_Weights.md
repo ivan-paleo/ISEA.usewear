@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 15:10:17 CEST
+2024-06-26 14:45:05 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -177,6 +177,9 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]],
    
              # Light theme
              theme_classic() +
+
+             # Italicize species names in legend
+             guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
   
              # Reduce margins around the plot
              scale_x_discrete(expand = expansion(add = c(0.9, 0.1))) +
@@ -215,6 +218,9 @@ p_diff <- ggplot(weights, aes(x = .data[[color_name]], y = Weight_diff,
           # Light theme
           theme_classic() +
   
+          # Italicize species names in legend
+          guides(shape = guide_legend(theme = theme(legend.text = element_text(face = "italic")))) +
+  
           # Reduce margins around the plot
           scale_x_discrete(expand = expansion(add = c(0.7, 0.05))) +
   
@@ -239,8 +245,6 @@ plot(p_all)
 ``` r
 ggsave(plot = p_all, paste0(dir_plots, "/ISEA_use-wear_Weights-plots.pdf"), width = 190, unit = "mm")
 ```
-
-    Error in grDevices::pdf(file = filename, ..., version = version): cannot open file 'analysis/plots//ISEA_use-wear_Weights-plots.pdf'
 
 ------------------------------------------------------------------------
 
@@ -319,7 +323,7 @@ write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo,
 sessionInfo()
 ```
 
-    R version 4.4.0 (2024-04-24 ucrt)
+    R version 4.4.1 (2024-06-14 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -327,11 +331,9 @@ sessionInfo()
 
 
     locale:
-    [1] LC_COLLATE=English_United States.utf8 
-    [2] LC_CTYPE=English_United States.utf8   
-    [3] LC_MONETARY=English_United States.utf8
-    [4] LC_NUMERIC=C                          
-    [5] LC_TIME=English_United States.utf8    
+    [1] LC_COLLATE=French_France.utf8  LC_CTYPE=French_France.utf8   
+    [3] LC_MONETARY=French_France.utf8 LC_NUMERIC=C                  
+    [5] LC_TIME=French_France.utf8    
 
     time zone: Europe/Berlin
     tzcode source: internal
@@ -344,26 +346,26 @@ sessionInfo()
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
      [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
     [13] R.oo_1.26.0       R.methodsS3_1.8.2 patchwork_1.2.0   knitr_1.47       
-    [17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.21      
+    [17] grateful_0.2.9    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.22      
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5          xfun_0.44             bslib_0.7.0          
+     [1] gtable_0.3.5          xfun_0.45             bslib_0.7.0          
      [4] lattice_0.22-6        tzdb_0.4.0            vctrs_0.6.5          
-     [7] tools_4.4.0           generics_0.1.3        fansi_1.0.6          
+     [7] tools_4.4.1           generics_0.1.3        fansi_1.0.6          
     [10] highr_0.11            pkgconfig_2.0.3       Matrix_1.7-0         
     [13] RColorBrewer_1.1-3    lifecycle_1.0.4       farver_2.1.2         
-    [16] compiler_4.4.0        textshaping_0.4.0     microbenchmark_1.4.10
+    [16] compiler_4.4.1        textshaping_0.4.0     microbenchmark_1.4.10
     [19] munsell_0.5.1         htmltools_0.5.8.1     sass_0.4.9           
     [22] yaml_2.3.8            pillar_1.9.0          jquerylib_0.1.4      
     [25] MASS_7.3-60.2         cachem_1.1.0          boot_1.3-30          
-    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.35        
+    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.36        
     [31] stringi_1.8.4         labeling_0.4.3        cowplot_1.1.3        
-    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.0           
-    [37] colorspace_2.1-0      cli_3.6.2             magrittr_2.0.3       
+    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.1           
+    [37] colorspace_2.1-0      cli_3.6.3             magrittr_2.0.3       
     [40] utf8_1.2.4            broom_1.0.6           withr_3.0.0          
     [43] scales_1.3.0          backports_1.5.0       timechange_0.3.0     
     [46] modelr_0.1.11         ragg_1.3.2            hms_1.1.3            
-    [49] evaluate_0.23         rlang_1.1.4           Rcpp_1.0.12          
+    [49] evaluate_0.24.0       rlang_1.1.4           Rcpp_1.0.12          
     [52] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
     [55] R6_2.5.1              systemfonts_1.1.0    
 
@@ -373,10 +375,10 @@ sessionInfo()
 
 | Package     | Version      | Citation                                                                                      |
 |:------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.4.0        | R Core Team (2024)                                                                            |
-| doBy        | 4.6.21       | Højsgaard and Halekoh (2024)                                                                  |
+| base        | 4.4.1        | R Core Team (2024)                                                                            |
+| doBy        | 4.6.22       | Højsgaard and Halekoh (2024)                                                                  |
 | ggrepel     | 0.9.5        | Slowikowski (2024)                                                                            |
-| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
+| grateful    | 0.2.9        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
 | patchwork   | 1.2.0        | Pedersen (2024)                                                                               |
 | R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
@@ -385,7 +387,7 @@ sessionInfo()
 | rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
 | tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
 | writexl     | 1.5.0        | Ooms (2024)                                                                                   |
-| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
+| RStudio     | 2024.4.2.764 | Posit team (2024)                                                                             |
 
 ## References
 
