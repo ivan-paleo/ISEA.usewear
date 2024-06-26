@@ -1,0 +1,36 @@
+Parameter,Type
+Sq,ISO height
+Ssk,ISO height
+Sku,ISO height
+Sp,ISO height
+Sv,ISO height
+Sz,ISO height
+Sa,ISO height
+Smr,ISO other
+Smc,ISO other
+Sxp,ISO other
+Sal,ISO other
+Str,ISO other
+Std,ISO other
+Ssw,ISO other
+Sdq,ISO other
+Sdr,ISO other
+Vm,ISO volume
+Vv,ISO volume
+Vmp,ISO volume
+Vmc,ISO volume
+Vvc,ISO volume
+Vvv,ISO volume
+Maximum.depth.of.furrows,"Furrow, direction and isotropy"
+Mean.depth.of.furrows,"Furrow, direction and isotropy"
+Mean.density.of.furrows,"Furrow, direction and isotropy"
+First.direction,"Furrow, direction and isotropy"
+Second.direction,"Furrow, direction and isotropy"
+Third.direction,"Furrow, direction and isotropy"
+Texture.isotropy,"Furrow, direction and isotropy"
+Asfc,SSFA
+Smfc,SSFA
+HAsfc9,SSFA
+HAsfc81,SSFA
+epLsar,SSFA
+NewEplsar,SSFA

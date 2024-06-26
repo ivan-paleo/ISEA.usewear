@@ -46,6 +46,7 @@ The knit directory for this script is the project directory.
 
 # Load packages
 ```{r}
+library(doBy)
 library(factoextra)
 library(ggplot2)
 library(grateful)
@@ -61,7 +62,8 @@ library(tidyverse)
 ---
 
 
-# Read in data
+# Read in and format data
+## Read in Rbin file
 ```{r}
 STA <- list.files(dir_in, pattern = "STA\\.Rbin$", full.names = TRUE) %>% 
        loadObject()
@@ -70,25 +72,71 @@ head(STA)
 ```
 
 
+## Calculate the mean per sample
+There are `r length(unique(STA$Sample))` samples, with height maps acquired on `r length(unique(STA$Side))` sides (`r paste(unique(STA$Side), collapse = " and ")`), 2 locations per side, and at `r paste(levels(STA$Strokes), collapse = " and ")` strokes. This equals to `r nrow(STA)` data points.
+
+In order to avoid cluttering the plots, the mean per sample (n = `r length(unique(STA$Sample))` at `r paste(levels(STA$Strokes), collapse = " and ")` strokes) is plotted rather than every single data point.
+
+```{r}
+# Exclude Chert_tool, Location and NMP columns from data because they are numeric yet not relevant for plots
+STA_sel <- select(STA, !c(Chert_tool, Location, NMP))
+
+# Calculate mean based on Sample + Strokes
+# Bamboo_sp and Chert_type are listed as factors in order to keep these columns
+# keep.names = TRUE is important for the matching on names in the next steps
+STA_mean <- summaryBy(.~ Sample + Bamboo_sp + Chert_type + Strokes, data = STA_sel, FUN = mean, keep.names = TRUE)
+```
+
+
+## Add units to headers for plotting
+```{r}
+# Get units from comment(STA)
+table_units <- comment(STA) %>% 
+               data.frame(Parameter = names(.), Unit = ., row.names = NULL) %>% 
+  
+               # Exclude NMP because it won't be plotted
+               filter(Parameter != "NMP") %>% 
+  
+               # Paste parameter name and unit together in a new column
+               mutate(Param_unit = paste0(Parameter, " [", Unit, "]")) 
+
+# Remove > and < symbols
+table_units$Param_unit <- gsub(">|<", "", table_units$Param_unit)
+
+# Adjust column names
+colnames(STA_mean)[colnames(STA_mean) %in% table_units$Parameter] <- table_units$Param_unit
+```
+
+
+## Define parameter types for grouping plots
+```{r}
+table_units[table_units$Parameter %in% c("Sq", "Ssk", "Sku", "Sp", "Sv", "Sz", "Sa"), 
+            "Type"] <- "ISO height"
+
+table_units[grepl("^V[a-z]{1,2}", table_units$Parameter), "Type"] <- "ISO volume"
+
+table_units[table_units$Parameter %in% c("Smr", "Smc", "Sxp", "Sal", "Str", "Std", "Ssw", "Sdq", "Sdr"), 
+            "Type"] <- "ISO other"
+
+table_units[grepl("furrows|direction|isotropy", table_units$Parameter), 
+            "Type"] <- "Furrow, direction and isotropy"
+
+table_units[grepl("Asfc|(?i)eplsar|Smfc", table_units$Parameter), "Type"] <- "SSFA"
+
+table_units[c("Param_unit", "Type")]
+```
+
+
 ---
 
 
 # Plot each surface parameter in a boxplot
 ## Define variables
-Here we define which columns are used for the boxplots.  
+Here we define which columns are used for the plots.  
 
 ```{r}
 # Columns to be used to group on the x-axis
 x_var <- "Strokes"
-
-# Columns to be used on the y-axis
-y_var <- data.frame(param = colnames(STA)[10:44], type = NA)
-y_var[y_var$param %in% c("Sq", "Ssk", "Sku", "Sp", "Sv", "Sz", "Sa"), "type"] <- "ISO height"
-y_var[grepl("^V[a-z]{1,2}", y_var$param), "type"] <- "ISO volume"
-y_var[y_var$param %in% c("Smr", "Smc", "Sxp", "Sal", "Str", "Std", "Ssw", "Sdq", "Sdr"), "type"] <- "ISO other"
-y_var[grepl("furrows|direction|isotropy", y_var$param), "type"] <- "Furrow, direction and isotropy parameters"
-y_var[grepl("Asfc|(?i)eplsar|Smfc", y_var$param), "type"] <- "SSFA"
-y_var$type <- factor(y_var$type)
 
 # colors
 grp_colors <- "Chert_type"
@@ -102,25 +150,21 @@ shape_name_leg <- gsub("_", " ", grp_shapes)
 
 ## Create lists to receive the plots
 ```{r}
-p_box <- vector(mode = "list", length = length(levels(y_var$type)))
-names(p_box) <- levels(y_var$type)
+p_box <- vector(mode = "list", length = length(unique(table_units$Type)))
+names(p_box) <- unique(table_units$Type)
 ```
 
 
 ## Plots 
-TO DO: find a way to have less points to plot per facet.
-
-
 ```{r}
 # Plot for every set of parameters
 for (i in names(p_box)) {
   
   # Subset parameter names by type
-  y_var_i <- y_var[y_var$type == i, "param"]
+  y_var_i <- table_units[table_units$Type == i, "Param_unit"]
   
   # Select columns that will be used in the plotting
-  data_i <- select(STA, all_of(c("Sample", "Bamboo_sp", "Side", "Location", 
-                                 x_var, y_var_i, grp_colors, grp_shapes))) %>%
+  data_i <- select(STA_mean, all_of(c("Sample", "Bamboo_sp", x_var, y_var_i, grp_colors, grp_shapes))) %>%
   
             # Pivot to longer format for facet plots
             pivot_longer(all_of(y_var_i), names_to = "Parameter", values_to = "Value")
@@ -133,7 +177,7 @@ for (i in names(p_box)) {
                 geom_point(size = 2) +
     
                 # Add lines to connect points with identical"Sample ID
-                geom_line(linewidth = 0.5, aes(group = interaction(Sample, Bamboo_sp, Side, Location)), 
+                geom_line(linewidth = 0.5, aes(group = Sample), 
                           show.legend = FALSE) +
     
                 # Facet plot by 'Parameter' (= 'y_var_i')
@@ -141,13 +185,16 @@ for (i in names(p_box)) {
     
                 # Light theme
                 theme_classic() +
+    
+                # Reduce font size of the facet labels so that they fit in the box
+                theme(strip.text = element_text(size = 6)) +
   
                 # The qualitative 'Set2' palette of RColorBrewer is colorblind friendly
                 scale_color_brewer(palette = 'Set2') +
   
                 # Remove xlab and use the clean name for the legend
-                labs(y = NULL, title = i, color = color_name_leg, shape = shape_name_leg)
-
+                labs(y = NULL, title = paste0(i, " (mean per sample)"), 
+                     color = color_name_leg, shape = shape_name_leg)
 }
 
 # Print plot
