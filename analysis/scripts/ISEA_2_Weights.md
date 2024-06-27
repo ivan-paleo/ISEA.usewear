@@ -1,11 +1,13 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-26 14:45:05 CEST
+2024-06-27 17:56:19 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
-- [Read in CSV file](#read-in-csv-file)
+- [Read in and format data](#read-in-and-format-data)
+  - [Read in CSV file](#read-in-csv-file)
+  - [Change names of chert types](#change-names-of-chert-types)
 - [Save data](#save-data)
   - [As XLSX](#as-xlsx)
   - [As Rbin](#as-rbin)
@@ -73,7 +75,9 @@ library(writexl)
 
 ------------------------------------------------------------------------
 
-# Read in CSV file
+# Read in and format data
+
+## Read in CSV file
 
 ``` r
 file_in <- list.files(dir_in, pattern = "weight\\.csv$", full.names = TRUE)
@@ -100,6 +104,41 @@ head(weights)
     4 ISEA-EX4          B          2 Bambusa blumeana              16.69
     5 ISEA-EX5          A          3 Bambusa blumeana              16.69
     6 ISEA-EX6          B          3 Bambusa blumeana              10.25
+      Weight_after_[mg]
+    1             30.00
+    2             21.50
+    3             28.62
+    4             16.67
+    5             16.66
+    6             10.04
+
+## Change names of chert types
+
+``` r
+weights$Chert_type <- factor(weights$Chert_type, labels = c("Coarser", "Finer")) %>% 
+                      as.character()
+str(weights)
+```
+
+    'data.frame':   12 obs. of  6 variables:
+     $ Sample            : chr  "ISEA-EX1" "ISEA-EX2" "ISEA-EX3" "ISEA-EX4" ...
+     $ Chert_type        : chr  "Coarser" "Finer" "Coarser" "Finer" ...
+     $ Chert_tool        : int  1 1 2 2 3 3 4 4 5 5 ...
+     $ Bamboo_sp         : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
+     $ Weight_before_[mg]: num  30.1 21.5 28.6 16.7 16.7 ...
+     $ Weight_after_[mg] : num  30 21.5 28.6 16.7 16.7 ...
+
+``` r
+head(weights)
+```
+
+        Sample Chert_type Chert_tool        Bamboo_sp Weight_before_[mg]
+    1 ISEA-EX1    Coarser          1 Bambusa blumeana              30.07
+    2 ISEA-EX2      Finer          1 Bambusa blumeana              21.52
+    3 ISEA-EX3    Coarser          2 Bambusa blumeana              28.65
+    4 ISEA-EX4      Finer          2 Bambusa blumeana              16.69
+    5 ISEA-EX5    Coarser          3 Bambusa blumeana              16.69
+    6 ISEA-EX6      Finer          3 Bambusa blumeana              10.25
       Weight_after_[mg]
     1             30.00
     2             21.50
@@ -142,7 +181,7 @@ rbin_data <- loadObject("ISEA_use-wear_Weights.Rbin")
 weights_long <-  weights %>% 
                  pivot_longer(contains("Weight"), names_to = "State_full", values_to = "Weight [mg]") %>% 
                  mutate(State = factor(gsub("Weight_|_\\[mg\\]", "", State_full), 
-                                       levels = c("before", "after")))
+                                       levels = c("before", "after"), labels = c("Before", "After")))
 ```
 
 ## Format column names for nice plotting
@@ -154,7 +193,8 @@ color_name_leg <- gsub("_", " ", color_name)
 
 # Shapes
 shape_name <- "Bamboo_sp"
-shape_name_leg <- gsub("_", " ", shape_name)
+shape_name_leg <- gsub("_", " ", shape_name) %>% 
+                  gsub("sp", "species", .)
 ```
 
 ## Absolute weights
@@ -171,7 +211,7 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]],
              geom_line(linewidth = 1, aes(group = Sample), show.legend = FALSE) +
   
              # Add Sample ID to points at "before" state
-             geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
+             geom_text_repel(aes(label = ifelse(State == "Before", Sample, "")), show.legend = FALSE, 
                              hjust = 1, nudge_x = -0.1, direction = "y", 
                              min.segment.length = 0, segment.size = 0.3, seed = 123) +
    
@@ -238,7 +278,7 @@ p_all <- p_weights + p_diff + plot_layout(guides = 'collect')
 plot(p_all)
 ```
 
-![](ISEA_2_Weights_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](ISEA_2_Weights_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ## Save plot
 
@@ -282,8 +322,8 @@ stats_chert[1:2]
 ```
 
       Chert_type Weight_before.n
-    1          A               6
-    2          B               6
+    1    Coarser               6
+    2      Finer               6
 
 ``` r
 # Compute summary statistics based on Bamboo_sp
@@ -302,10 +342,10 @@ stats_chert_bamboo[1:3]
 ```
 
       Chert_type          Bamboo_sp Weight_before.n
-    1          A   Bambusa blumeana               3
-    2          A Schizostachum lima               3
-    3          B   Bambusa blumeana               3
-    4          B Schizostachum lima               3
+    1    Coarser   Bambusa blumeana               3
+    2    Coarser Schizostachum lima               3
+    3      Finer   Bambusa blumeana               3
+    4      Finer Schizostachum lima               3
 
 ## Save as XLSX
 
@@ -323,7 +363,7 @@ write_xlsx(list("Chert type" = stats_chert, "Bamboo species" = stats_bamboo,
 sessionInfo()
 ```
 
-    R version 4.4.1 (2024-06-14 ucrt)
+    R version 4.4.0 (2024-04-24 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -331,9 +371,11 @@ sessionInfo()
 
 
     locale:
-    [1] LC_COLLATE=French_France.utf8  LC_CTYPE=French_France.utf8   
-    [3] LC_MONETARY=French_France.utf8 LC_NUMERIC=C                  
-    [5] LC_TIME=French_France.utf8    
+    [1] LC_COLLATE=English_United States.utf8 
+    [2] LC_CTYPE=English_United States.utf8   
+    [3] LC_MONETARY=English_United States.utf8
+    [4] LC_NUMERIC=C                          
+    [5] LC_TIME=English_United States.utf8    
 
     time zone: Europe/Berlin
     tzcode source: internal
@@ -346,26 +388,26 @@ sessionInfo()
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
      [9] tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27    R.utils_2.12.3   
     [13] R.oo_1.26.0       R.methodsS3_1.8.2 patchwork_1.2.0   knitr_1.47       
-    [17] grateful_0.2.9    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.22      
+    [17] grateful_0.2.7    ggrepel_0.9.5     ggplot2_3.5.1     doBy_4.6.21      
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5          xfun_0.45             bslib_0.7.0          
+     [1] gtable_0.3.5          xfun_0.44             bslib_0.7.0          
      [4] lattice_0.22-6        tzdb_0.4.0            vctrs_0.6.5          
-     [7] tools_4.4.1           generics_0.1.3        fansi_1.0.6          
+     [7] tools_4.4.0           generics_0.1.3        fansi_1.0.6          
     [10] highr_0.11            pkgconfig_2.0.3       Matrix_1.7-0         
     [13] RColorBrewer_1.1-3    lifecycle_1.0.4       farver_2.1.2         
-    [16] compiler_4.4.1        textshaping_0.4.0     microbenchmark_1.4.10
+    [16] compiler_4.4.0        textshaping_0.4.0     microbenchmark_1.4.10
     [19] munsell_0.5.1         htmltools_0.5.8.1     sass_0.4.9           
     [22] yaml_2.3.8            pillar_1.9.0          jquerylib_0.1.4      
     [25] MASS_7.3-60.2         cachem_1.1.0          boot_1.3-30          
-    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.36        
+    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.35        
     [31] stringi_1.8.4         labeling_0.4.3        cowplot_1.1.3        
-    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.1           
-    [37] colorspace_2.1-0      cli_3.6.3             magrittr_2.0.3       
+    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.0           
+    [37] colorspace_2.1-0      cli_3.6.2             magrittr_2.0.3       
     [40] utf8_1.2.4            broom_1.0.6           withr_3.0.0          
     [43] scales_1.3.0          backports_1.5.0       timechange_0.3.0     
     [46] modelr_0.1.11         ragg_1.3.2            hms_1.1.3            
-    [49] evaluate_0.24.0       rlang_1.1.4           Rcpp_1.0.12          
+    [49] evaluate_0.23         rlang_1.1.4           Rcpp_1.0.12          
     [52] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
     [55] R6_2.5.1              systemfonts_1.1.0    
 
@@ -375,10 +417,10 @@ sessionInfo()
 
 | Package     | Version      | Citation                                                                                      |
 |:------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.4.1        | R Core Team (2024)                                                                            |
-| doBy        | 4.6.22       | Højsgaard and Halekoh (2024)                                                                  |
+| base        | 4.4.0        | R Core Team (2024)                                                                            |
+| doBy        | 4.6.21       | Højsgaard and Halekoh (2024)                                                                  |
 | ggrepel     | 0.9.5        | Slowikowski (2024)                                                                            |
-| grateful    | 0.2.9        | Rodriguez-Sanchez and Jackson (2023)                                                          |
+| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
 | patchwork   | 1.2.0        | Pedersen (2024)                                                                               |
 | R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
@@ -387,7 +429,7 @@ sessionInfo()
 | rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
 | tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
 | writexl     | 1.5.0        | Ooms (2024)                                                                                   |
-| RStudio     | 2024.4.2.764 | Posit team (2024)                                                                             |
+| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
 
 ## References
 

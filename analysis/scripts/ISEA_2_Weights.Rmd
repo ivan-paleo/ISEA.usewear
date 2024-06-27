@@ -69,7 +69,8 @@ library(writexl)
 ---
 
 
-# Read in CSV file
+# Read in and format data
+## Read in CSV file
 ```{r}
 file_in <- list.files(dir_in, pattern = "weight\\.csv$", full.names = TRUE)
 weights <- read.csv(file_in, check.names = FALSE)
@@ -77,6 +78,14 @@ str(weights)
 head(weights)
 ```
 
+
+## Change names of chert types
+```{r}
+weights$Chert_type <- factor(weights$Chert_type, labels = c("Coarser", "Finer")) %>% 
+                      as.character()
+str(weights)
+head(weights)
+```
 
 ---
 
@@ -108,7 +117,7 @@ rbin_data <- loadObject("ISEA_use-wear_Weights.Rbin")
 weights_long <-  weights %>% 
                  pivot_longer(contains("Weight"), names_to = "State_full", values_to = "Weight [mg]") %>% 
                  mutate(State = factor(gsub("Weight_|_\\[mg\\]", "", State_full), 
-                                       levels = c("before", "after")))
+                                       levels = c("before", "after"), labels = c("Before", "After")))
 ```
 
 ## Format column names for nice plotting
@@ -119,7 +128,8 @@ color_name_leg <- gsub("_", " ", color_name)
 
 # Shapes
 shape_name <- "Bamboo_sp"
-shape_name_leg <- gsub("_", " ", shape_name)
+shape_name_leg <- gsub("_", " ", shape_name) %>% 
+                  gsub("sp", "species", .)
 ```
 
 ## Absolute weights
@@ -135,7 +145,7 @@ p_weights <- ggplot(weights_long, aes(x = State, y = .data[["Weight [mg]"]],
              geom_line(linewidth = 1, aes(group = Sample), show.legend = FALSE) +
   
              # Add Sample ID to points at "before" state
-             geom_text_repel(aes(label = ifelse(State == "before", Sample, "")), show.legend = FALSE, 
+             geom_text_repel(aes(label = ifelse(State == "Before", Sample, "")), show.legend = FALSE, 
                              hjust = 1, nudge_x = -0.1, direction = "y", 
                              min.segment.length = 0, segment.size = 0.3, seed = 123) +
    
