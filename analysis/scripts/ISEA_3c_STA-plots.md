@@ -1,24 +1,39 @@
 Plots for the ISEA use-wear dataset
 ================
 Ivan Calandra
-2024-06-26 14:46:44 CEST
+2024-06-27 17:40:56 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
-- [Read in and format data](#read-in-and-format-data)
-  - [Read in Rbin file](#read-in-rbin-file)
-  - [Calculate the mean per sample](#calculate-the-mean-per-sample)
-  - [Add units to headers for
-    plotting](#add-units-to-headers-for-plotting)
-  - [Define parameter types for grouping
-    plots](#define-parameter-types-for-grouping-plots)
-- [Plot each surface parameter in a
-  boxplot](#plot-each-surface-parameter-in-a-boxplot)
+- [Read in Rbin file](#read-in-rbin-file)
+- [Plot each surface parameter in a line
+  plot](#plot-each-surface-parameter-in-a-line-plot)
+  - [Format data](#format-data)
+    - [Calculate the mean per sample](#calculate-the-mean-per-sample)
+    - [Add units to headers for
+      plotting](#add-units-to-headers-for-plotting)
+    - [Define parameter types for grouping
+      plots](#define-parameter-types-for-grouping-plots)
   - [Define variables](#define-variables)
   - [Create lists to receive the
     plots](#create-lists-to-receive-the-plots)
   - [Plots](#plots)
 - [PCA](#pca)
+  - [Format data](#format-data-1)
+  - [Select surface texture
+    parameters](#select-surface-texture-parameters)
+  - [PCA](#pca-1)
+  - [Plots](#plots-1)
+    - [Eigenvalues](#eigenvalues)
+    - [Biplots](#biplots)
+      - [Plotting function](#plotting-function)
+      - [Biplot with grouping from
+        Chert_type](#biplot-with-grouping-from-chert_type)
+      - [Biplot with grouping from Bamboo
+        species](#biplot-with-grouping-from-bamboo-species)
+    - [Combine plots to save them into 1
+      file](#combine-plots-to-save-them-into-1-file)
+    - [Save plots](#save-plots)
 - [sessionInfo()](#sessioninfo)
 - [Cite R packages used](#cite-r-packages-used)
   - [References](#references)
@@ -58,9 +73,7 @@ library(tidyverse)
 
 ------------------------------------------------------------------------
 
-# Read in and format data
-
-## Read in Rbin file
+# Read in Rbin file
 
 ``` r
 STA <- list.files(dir_in, pattern = "STA\\.Rbin$", full.names = TRUE) %>% 
@@ -177,7 +190,13 @@ head(STA)
     5 0.01742323
     6 0.01564744
 
-## Calculate the mean per sample
+------------------------------------------------------------------------
+
+# Plot each surface parameter in a line plot
+
+## Format data
+
+### Calculate the mean per sample
 
 There are 12 samples, with height maps acquired on 2 sides (dorsal and
 ventral), 2 locations per side, and at 0 and 2000 strokes. This equals
@@ -196,7 +215,7 @@ STA_sel <- select(STA, !c(Chert_tool, Location, NMP))
 STA_mean <- summaryBy(.~ Sample + Bamboo_sp + Chert_type + Strokes, data = STA_sel, FUN = mean, keep.names = TRUE)
 ```
 
-## Add units to headers for plotting
+### Add units to headers for plotting
 
 ``` r
 # Get units from comment(STA)
@@ -216,7 +235,7 @@ table_units$Param_unit <- gsub(">|<", "", table_units$Param_unit)
 colnames(STA_mean)[colnames(STA_mean) %in% table_units$Parameter] <- table_units$Param_unit
 ```
 
-## Define parameter types for grouping plots
+### Define parameter types for grouping plots
 
 ``` r
 table_units[table_units$Parameter %in% c("Sq", "Ssk", "Sku", "Sp", "Sv", "Sz", "Sa"), 
@@ -272,10 +291,6 @@ table_units[c("Param_unit", "Type")]
     34                 epLsar [no unit]                           SSFA
     35              NewEplsar [no unit]                           SSFA
 
-------------------------------------------------------------------------
-
-# Plot each surface parameter in a boxplot
-
 ## Define variables
 
 Here we define which columns are used for the plots.
@@ -290,7 +305,8 @@ color_name_leg <- gsub("_", " ", grp_colors)
 
 # shapes
 grp_shapes <- "Bamboo_sp"
-shape_name_leg <- gsub("_", " ", grp_shapes)
+shape_name_leg <- gsub("_", " ", grp_shapes) %>% 
+                  gsub("sp", "species", .)
 ```
 
 ## Create lists to receive the plots
@@ -391,7 +407,153 @@ ggsave(filename = "ISEA_use-wear_STA-plots.pdf",
 
 # PCA
 
-TO DO
+## Format data
+
+PCA will be applied to the differences between after (2000 strokes) and
+before (0 strokes) the experiments, for all surface texture parameter.
+
+The method below works only with 2 values per group, which is the case
+here.
+
+``` r
+# Create function to subtract the 1st value from the 2nd value of a vector
+# Returns NA if at least one value is NA
+fun_minus <- function(x) {
+  x[2] - x[1]
+}
+
+# Calculate the difference between 2000 and 0 strokes
+                # Exclude Chert_tool and NMP columns from data because they are numeric yet not relevant for PCA
+STA_pca_data <- select(STA, !c(Chert_tool, NMP)) %>%
+  
+                # Group by Sample, Chert_type, Bamboo_sp, Side, Location (= everything except Strokes)
+                group_by(Sample, Chert_type, Bamboo_sp, Side, Location) %>% 
+  
+                # Apply function fun_minus to each group
+                summarize(across(where(is.numeric), fun_minus)) %>% 
+  
+                # Remove rows with NA
+                na.omit() 
+```
+
+## Select surface texture parameters
+
+The selection is based on the previous plots
+
+``` r
+pca_params <- c("Sq", "Vmc", "Sal", "Str", 
+                "Mean.density.of.furrows", "Mean.depth.of.furrows", 
+                "Asfc", "HAsfc9")
+```
+
+## PCA
+
+``` r
+pca_STA <- prcomp(STA_pca_data[ , pca_params], scale. = TRUE)
+```
+
+## Plots
+
+### Eigenvalues
+
+``` r
+pca_STA_eig <- fviz_eig(pca_STA, addlabels = TRUE, ggtheme = theme_classic())
+print(pca_STA_eig)
+```
+
+![](ISEA_3c_STA-plots_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+### Biplots
+
+#### Plotting function
+
+``` r
+custom_pca_biplot <- function(dat, datpca, pc = c(1, 2), geom.pt = "point", col.pt, mean.pt = FALSE, 
+                              col.pal = brewer.pal(3, "Set2")[1:2], pt.size = 3, pt.shape = 19, pt.fill = "white",
+                              elli = TRUE, elli.type = "convex", repel.lab = TRUE, 
+                              col.variable = "black", main.title, legend_title = col.pt){
+  
+  # Define plotting
+  p_out <- fviz_pca_biplot(dat, axes = pc, 
+                           geom.ind = geom.pt, col.ind = datpca[[col.pt]], mean.point = mean.pt,
+                           palette = col.pal, pointsize = pt.size, pointshape = pt.shape, fill.ind = pt.fill,
+                           addEllipses = elli, ellipse.type = elli.type,  
+                           repel = repel.lab, col.var = col.variable, 
+                           legend.title = legend_title, title = main.title)
+
+  # Return plotting object
+  return(p_out)
+}
+```
+
+#### Biplot with grouping from Chert_type
+
+``` r
+# Define grouping variable
+grp_c <- "Chert_type"
+grp_c_leg <- gsub("_", " ", grp_c)
+
+# Biplot of PC1&2
+pca_STA_chert_12 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 2), col.pt = grp_c,
+                                      main.title = paste0("PCA - ",  grp_c_leg), 
+                                      legend_title = grp_c_leg)
+print(pca_STA_chert_12)
+```
+
+![](ISEA_3c_STA-plots_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+# Biplot of PC1&3
+pca_STA_chert_13 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 3), col.pt = grp_c,
+                                      main.title = paste0("PCA - ",  grp_c_leg), 
+                                      legend_title = grp_c_leg)
+print(pca_STA_chert_13)
+```
+
+![](ISEA_3c_STA-plots_files/figure-gfm/unnamed-chunk-15-2.png)<!-- -->
+
+#### Biplot with grouping from Bamboo species
+
+``` r
+# Define grouping variable
+grp_b <- "Bamboo_sp"
+grp_b_leg <- gsub("_", " ", grp_b) %>% 
+             gsub("sp", "species", .)
+
+# Biplot of PC1&2
+pca_STA_bamboo_12 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 2), col.pt = grp_b,
+                                       main.title = paste0("PCA - ",  grp_b_leg), 
+                                       legend_title = grp_b_leg) +
+                     guides(color = guide_legend(theme = theme(legend.text = element_text(face = "italic"))))
+print(pca_STA_bamboo_12)
+```
+
+![](ISEA_3c_STA-plots_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+# Biplot of PC1&3
+pca_STA_bamboo_13 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 3), col.pt = grp_b,
+                                       main.title = paste0("PCA - ",  grp_b_leg), 
+                                       legend_title = grp_b_leg) +
+                     guides(color = guide_legend(theme = theme(legend.text = element_text(face = "italic"))))
+print(pca_STA_bamboo_13)
+```
+
+![](ISEA_3c_STA-plots_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+
+### Combine plots to save them into 1 file
+
+``` r
+all_plots <- list(pca_STA_eig, pca_STA_chert_12, pca_STA_chert_13, pca_STA_bamboo_12, pca_STA_bamboo_13)  
+```
+
+### Save plots
+
+``` r
+ggsave(filename = "ISEA_use-wear_STA-PCAplots.pdf", 
+       path = dir_plots, width = 190, units = "mm", 
+       plot = marrangeGrob(all_plots, nrow = 1, ncol = 1, top = NULL))
+```
 
 ------------------------------------------------------------------------
 
@@ -401,7 +563,7 @@ TO DO
 sessionInfo()
 ```
 
-    R version 4.4.1 (2024-06-14 ucrt)
+    R version 4.4.0 (2024-04-24 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -409,9 +571,11 @@ sessionInfo()
 
 
     locale:
-    [1] LC_COLLATE=French_France.utf8  LC_CTYPE=French_France.utf8   
-    [3] LC_MONETARY=French_France.utf8 LC_NUMERIC=C                  
-    [5] LC_TIME=French_France.utf8    
+    [1] LC_COLLATE=English_United States.utf8 
+    [2] LC_CTYPE=English_United States.utf8   
+    [3] LC_MONETARY=English_United States.utf8
+    [4] LC_NUMERIC=C                          
+    [5] LC_TIME=English_United States.utf8    
 
     time zone: Europe/Berlin
     tzcode source: internal
@@ -424,28 +588,30 @@ sessionInfo()
      [5] purrr_1.0.2        readr_2.1.5        tidyr_1.3.1        tibble_3.2.1      
      [9] tidyverse_2.0.0    rmarkdown_2.27     RColorBrewer_1.1-3 R.utils_2.12.3    
     [13] R.oo_1.26.0        R.methodsS3_1.8.2  knitr_1.47         gridExtra_2.3     
-    [17] grateful_0.2.9     factoextra_1.0.7   ggplot2_3.5.1      doBy_4.6.22       
+    [17] grateful_0.2.7     factoextra_1.0.7   ggplot2_3.5.1      doBy_4.6.21       
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5          xfun_0.45             bslib_0.7.0          
-     [4] ggrepel_0.9.5         lattice_0.22-6        tzdb_0.4.0           
-     [7] vctrs_0.6.5           tools_4.4.1           generics_0.1.3       
-    [10] fansi_1.0.6           highr_0.11            pkgconfig_2.0.3      
-    [13] Matrix_1.7-0          lifecycle_1.0.4       compiler_4.4.1       
-    [16] farver_2.1.2          textshaping_0.4.0     microbenchmark_1.4.10
-    [19] munsell_0.5.1         htmltools_0.5.8.1     sass_0.4.9           
-    [22] yaml_2.3.8            pillar_1.9.0          jquerylib_0.1.4      
-    [25] MASS_7.3-60.2         cachem_1.1.0          boot_1.3-30          
-    [28] Deriv_4.1.3           tidyselect_1.2.1      digest_0.6.36        
-    [31] stringi_1.8.4         labeling_0.4.3        cowplot_1.1.3        
-    [34] rprojroot_2.0.4       fastmap_1.2.0         grid_4.4.1           
-    [37] colorspace_2.1-0      cli_3.6.3             magrittr_2.0.3       
-    [40] utf8_1.2.4            broom_1.0.6           withr_3.0.0          
-    [43] scales_1.3.0          backports_1.5.0       timechange_0.3.0     
-    [46] modelr_0.1.11         ragg_1.3.2            hms_1.1.3            
-    [49] evaluate_0.24.0       rlang_1.1.4           Rcpp_1.0.12          
-    [52] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
-    [55] R6_2.5.1              systemfonts_1.1.0    
+     [1] gtable_0.3.5          xfun_0.44             bslib_0.7.0          
+     [4] rstatix_0.7.2         ggrepel_0.9.5         lattice_0.22-6       
+     [7] tzdb_0.4.0            vctrs_0.6.5           tools_4.4.0          
+    [10] generics_0.1.3        fansi_1.0.6           highr_0.11           
+    [13] pkgconfig_2.0.3       Matrix_1.7-0          lifecycle_1.0.4      
+    [16] compiler_4.4.0        farver_2.1.2          textshaping_0.4.0    
+    [19] microbenchmark_1.4.10 munsell_0.5.1         carData_3.0-5        
+    [22] htmltools_0.5.8.1     sass_0.4.9            yaml_2.3.8           
+    [25] car_3.1-2             ggpubr_0.6.0          pillar_1.9.0         
+    [28] jquerylib_0.1.4       MASS_7.3-60.2         cachem_1.1.0         
+    [31] abind_1.4-5           boot_1.3-30           Deriv_4.1.3          
+    [34] tidyselect_1.2.1      digest_0.6.35         stringi_1.8.4        
+    [37] labeling_0.4.3        cowplot_1.1.3         rprojroot_2.0.4      
+    [40] fastmap_1.2.0         grid_4.4.0            colorspace_2.1-0     
+    [43] cli_3.6.2             magrittr_2.0.3        utf8_1.2.4           
+    [46] broom_1.0.6           withr_3.0.0           scales_1.3.0         
+    [49] backports_1.5.0       timechange_0.3.0      modelr_0.1.11        
+    [52] ggsignif_0.6.4        ragg_1.3.2            hms_1.1.3            
+    [55] evaluate_0.23         rlang_1.1.4           Rcpp_1.0.12          
+    [58] glue_1.7.0            rstudioapi_0.16.0     jsonlite_1.8.8       
+    [61] R6_2.5.1              systemfonts_1.1.0    
 
 ------------------------------------------------------------------------
 
@@ -453,10 +619,10 @@ sessionInfo()
 
 | Package      | Version      | Citation                                                                                      |
 |:-------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base         | 4.4.1        | R Core Team (2024)                                                                            |
-| doBy         | 4.6.22       | Højsgaard and Halekoh (2024)                                                                  |
+| base         | 4.4.0        | R Core Team (2024)                                                                            |
+| doBy         | 4.6.21       | Højsgaard and Halekoh (2024)                                                                  |
 | factoextra   | 1.0.7        | Kassambara and Mundt (2020)                                                                   |
-| grateful     | 0.2.9        | Rodriguez-Sanchez and Jackson (2023)                                                          |
+| grateful     | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
 | gridExtra    | 2.3          | Auguie (2017)                                                                                 |
 | knitr        | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
 | R.methodsS3  | 1.8.2        | Bengtsson (2003a)                                                                             |
@@ -465,7 +631,7 @@ sessionInfo()
 | RColorBrewer | 1.1.3        | Neuwirth (2022)                                                                               |
 | rmarkdown    | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
 | tidyverse    | 2.0.0        | Wickham et al. (2019)                                                                         |
-| RStudio      | 2024.4.2.764 | Posit team (2024)                                                                             |
+| RStudio      | 2024.4.1.748 | Posit team (2024)                                                                             |
 
 ## References
 
