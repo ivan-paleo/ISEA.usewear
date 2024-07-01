@@ -1576,7 +1576,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Summary statistics on the surface texture
 parameters for the ISEA use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-06-24 14:30:14 CEST</h4>
+<h4 class="date">2024-07-01 08:59:19 CEST</h4>
 
 </div>
 
@@ -1632,7 +1632,7 @@ Summary statistics will be saved in “./analysis/stats/”.</p>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">str</span>(STA)</span></code></pre></div>
 <pre><code>&#39;data.frame&#39;:   96 obs. of  44 variables:
  $ Sample                  : chr  &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; ...
- $ Chert_type              : chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
+ $ Chert_type              : chr  &quot;Coarser&quot; &quot;Coarser&quot; &quot;Coarser&quot; &quot;Coarser&quot; ...
  $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
  $ Bamboo_sp               : chr  &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; ...
  $ Objective               : chr  &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; ...
@@ -1679,12 +1679,12 @@ Summary statistics will be saved in “./analysis/stats/”.</p>
   ..- attr(*, &quot;names&quot;)= chr [1:36] &quot;NMP&quot; &quot;Sq&quot; &quot;Ssk&quot; &quot;Sku&quot; ...</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">head</span>(STA)</span></code></pre></div>
 <pre><code>    Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
-1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
-6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+1 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+2 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+3 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+4 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+5 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
+6 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
   Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
 1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
 2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532
@@ -1764,10 +1764,10 @@ statistics</h2>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>stats_chert <span class="ot">&lt;-</span> <span class="fu">summaryBy</span>(. <span class="sc">~</span> Chert_type <span class="sc">+</span> Strokes, <span class="at">data =</span> STA_sel, <span class="at">FUN =</span> nminmaxmeanmedsd)</span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>stats_chert[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
 <pre><code>  Chert_type Strokes NMP.n
-1          A       0    24
-2          A    2000    24
-3          B       0    24
-4          B    2000    24</code></pre>
+1    Coarser       0    24
+2    Coarser    2000    24
+3      Finer       0    24
+4      Finer    2000    24</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co"># Compute summary statistics based on Bamboo_sp and Strokes</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>stats_bamboo <span class="ot">&lt;-</span> <span class="fu">summaryBy</span>(. <span class="sc">~</span> Bamboo_sp <span class="sc">+</span> Strokes, <span class="at">data =</span> STA_sel, <span class="at">FUN =</span> nminmaxmeanmedsd)</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>stats_bamboo[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div>
@@ -1781,14 +1781,14 @@ statistics</h2>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">data =</span> STA_sel, <span class="at">FUN =</span> nminmaxmeanmedsd)</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>stats_chert_bamboo[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div>
 <pre><code>  Chert_type          Bamboo_sp Strokes NMP.n
-1          A   Bambusa blumeana       0    12
-2          A   Bambusa blumeana    2000    12
-3          A Schizostachum lima       0    12
-4          A Schizostachum lima    2000    12
-5          B   Bambusa blumeana       0    12
-6          B   Bambusa blumeana    2000    12
-7          B Schizostachum lima       0    12
-8          B Schizostachum lima    2000    12</code></pre>
+1    Coarser   Bambusa blumeana       0    12
+2    Coarser   Bambusa blumeana    2000    12
+3    Coarser Schizostachum lima       0    12
+4    Coarser Schizostachum lima    2000    12
+5      Finer   Bambusa blumeana       0    12
+6      Finer   Bambusa blumeana    2000    12
+7      Finer Schizostachum lima       0    12
+8      Finer Schizostachum lima    2000    12</code></pre>
 </div>
 <div id="save-as-xlsx" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Save as XLSX</h2>

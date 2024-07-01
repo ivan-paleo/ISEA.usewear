@@ -185,6 +185,13 @@ STA_keep[c("Chert_type", "Chert_tool")] <- STA_keep$Specimen %>%
 ```
 
 
+## Change names of chert types 
+```{r}
+STA_keep$Chert_type <- factor(STA_keep$Chert_type, levels = c("A", "B"), labels = c("Coarser", "Finer")) %>% 
+                       as.character()
+```
+
+
 ## Add columns with sample ID and bamboo species
 ```{r}
 # Load Weights dataset

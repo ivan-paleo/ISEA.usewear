@@ -1576,7 +1576,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Import dataset from the surface texture
 analysis for the ISEA use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-06-24 14:02:04 CEST</h4>
+<h4 class="date">2024-07-01 08:58:11 CEST</h4>
 
 </div>
 
@@ -1864,49 +1864,55 @@ using frame numbers</h2>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>                                           <span class="co"># Split after the first capital letter</span></span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                                           <span class="fu">str_split</span>(<span class="st">&quot;(?&lt;=[A-Z]{1})&quot;</span>, <span class="at">simplify =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 </div>
-<div id="add-columns-with-sample-id-and-bamboo-species" class="section level2" number="3.8">
-<h2><span class="header-section-number">3.8</span> Add columns with
+<div id="change-names-of-chert-types" class="section level2" number="3.8">
+<h2><span class="header-section-number">3.8</span> Change names of chert
+types</h2>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>STA_keep<span class="sc">$</span>Chert_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(STA_keep<span class="sc">$</span>Chert_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Coarser&quot;</span>, <span class="st">&quot;Finer&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                       <span class="fu">as.character</span>()</span></code></pre></div>
+</div>
+<div id="add-columns-with-sample-id-and-bamboo-species" class="section level2" number="3.9">
+<h2><span class="header-section-number">3.9</span> Add columns with
 sample ID and bamboo species</h2>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Load Weights dataset</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>weights <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_Weights.Rbin&quot;</span>))</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># Merge the data.frames by chert type and chert tool</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>STA_keep_ID_bamb <span class="ot">&lt;-</span> <span class="fu">merge</span>(STA_keep, weights[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Chert_type&quot;</span>, <span class="st">&quot;Chert_tool&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Load Weights dataset</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>weights <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_Weights.Rbin&quot;</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co"># Merge the data.frames by chert type and chert tool</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>STA_keep_ID_bamb <span class="ot">&lt;-</span> <span class="fu">merge</span>(STA_keep, weights[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;Chert_type&quot;</span>, <span class="st">&quot;Chert_tool&quot;</span>))</span></code></pre></div>
 </div>
-<div id="keep-only-numerical-parts-in-columns-location-and-strokes" class="section level2" number="3.9">
-<h2><span class="header-section-number">3.9</span> Keep only numerical
+<div id="keep-only-numerical-parts-in-columns-location-and-strokes" class="section level2" number="3.10">
+<h2><span class="header-section-number">3.10</span> Keep only numerical
 parts in columns “Location” and “Strokes”</h2>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>STA_keep_ID_bamb<span class="sc">$</span>Location <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID_bamb<span class="sc">$</span>Location)</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>STA_keep_ID_bamb<span class="sc">$</span>Strokes <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">gsub</span>(<span class="st">&quot;strokes&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID_bamb<span class="sc">$</span>Strokes))</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>STA_keep_ID_bamb<span class="sc">$</span>Location <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">&quot;loc&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID_bamb<span class="sc">$</span>Location)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>STA_keep_ID_bamb<span class="sc">$</span>Strokes <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">gsub</span>(<span class="st">&quot;strokes&quot;</span>, <span class="st">&quot;&quot;</span>, STA_keep_ID_bamb<span class="sc">$</span>Strokes))</span></code></pre></div>
 </div>
-<div id="convert-all-parameter-variables-to-numeric" class="section level2" number="3.10">
-<h2><span class="header-section-number">3.10</span> Convert all
+<div id="convert-all-parameter-variables-to-numeric" class="section level2" number="3.11">
+<h2><span class="header-section-number">3.11</span> Convert all
 parameter variables to numeric</h2>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>STA_keep_ID_bamb <span class="ot">&lt;-</span> <span class="fu">type_convert</span>(STA_keep_ID_bamb)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>STA_keep_ID_bamb <span class="ot">&lt;-</span> <span class="fu">type_convert</span>(STA_keep_ID_bamb)</span></code></pre></div>
 </div>
-<div id="nmp-ratios" class="section level2" number="3.11">
-<h2><span class="header-section-number">3.11</span> NMP ratios</h2>
+<div id="nmp-ratios" class="section level2" number="3.12">
+<h2><span class="header-section-number">3.12</span> NMP ratios</h2>
 <p>The summary statistics for NMP ratios are:</p>
 <pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
  0.1979  0.1997  0.2000  0.1998  0.2000  0.2002 </code></pre>
 <p>All seems good.</p>
 </div>
-<div id="re-order-columns-and-add-units-as-comment" class="section level2" number="3.12">
-<h2><span class="header-section-number">3.12</span> Re-order columns and
+<div id="re-order-columns-and-add-units-as-comment" class="section level2" number="3.13">
+<h2><span class="header-section-number">3.13</span> Re-order columns and
 add units as comment</h2>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>STA_final <span class="ot">&lt;-</span> <span class="fu">select</span>(STA_keep_ID_bamb, Sample, Chert_type, Chert_tool, Bamboo_sp, </span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>                    Objective<span class="sc">:</span>Strokes, NMP<span class="sc">:</span>NewEplsar)</span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="fu">comment</span>(STA_final) <span class="ot">&lt;-</span> STA_units</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>STA_final <span class="ot">&lt;-</span> <span class="fu">select</span>(STA_keep_ID_bamb, Sample, Chert_type, Chert_tool, Bamboo_sp, </span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>                    Objective<span class="sc">:</span>Strokes, NMP<span class="sc">:</span>NewEplsar)</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="fu">comment</span>(STA_final) <span class="ot">&lt;-</span> STA_units</span></code></pre></div>
 <p>Type <code>comment(STA_final)</code> to check the units of the
 parameters.</p>
 </div>
-<div id="check-the-result" class="section level2" number="3.13">
-<h2><span class="header-section-number">3.13</span> Check the
+<div id="check-the-result" class="section level2" number="3.14">
+<h2><span class="header-section-number">3.14</span> Check the
 result</h2>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">str</span>(STA_final)</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="fu">str</span>(STA_final)</span></code></pre></div>
 <pre><code>&#39;data.frame&#39;:   96 obs. of  44 variables:
  $ Sample                  : chr  &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; &quot;ISEA-EX1&quot; ...
- $ Chert_type              : chr  &quot;A&quot; &quot;A&quot; &quot;A&quot; &quot;A&quot; ...
+ $ Chert_type              : chr  &quot;Coarser&quot; &quot;Coarser&quot; &quot;Coarser&quot; &quot;Coarser&quot; ...
  $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
  $ Bamboo_sp               : chr  &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; &quot;Bambusa blumeana&quot; ...
  $ Objective               : chr  &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; &quot;20x-0.70&quot; ...
@@ -1951,14 +1957,14 @@ result</h2>
  $ NewEplsar               : num  0.0183 0.0187 0.0179 0.0181 0.0174 ...
  - attr(*, &quot;comment&quot;)= Named chr [1:36] &quot;%&quot; &quot;nm&quot; &quot;&lt;no unit&gt;&quot; &quot;&lt;no unit&gt;&quot; ...
   ..- attr(*, &quot;names&quot;)= chr [1:36] &quot;NMP&quot; &quot;Sq&quot; &quot;Ssk&quot; &quot;Sku&quot; ...</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">head</span>(STA_final)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">head</span>(STA_final)</span></code></pre></div>
 <pre><code>    Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
-1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
-6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+1 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+2 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+3 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+4 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+5 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
+6 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
   Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
 1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
 2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532
@@ -2015,22 +2021,22 @@ result</h2>
 <h1><span class="header-section-number">4</span> Save data</h1>
 <div id="as-xlsx" class="section level2" number="4.1">
 <h2><span class="header-section-number">4.1</span> As XLSX</h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">list</span>(<span class="st">&quot;data&quot;</span> <span class="ot">=</span> STA_final, <span class="st">&quot;units&quot;</span> <span class="ot">=</span> units_table), <span class="at">path =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.xlsx&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">write_xlsx</span>(<span class="fu">list</span>(<span class="st">&quot;data&quot;</span> <span class="ot">=</span> STA_final, <span class="st">&quot;units&quot;</span> <span class="ot">=</span> units_table), <span class="at">path =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.xlsx&quot;</span>))</span></code></pre></div>
 </div>
 <div id="as-rbin" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> As Rbin</h2>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">saveObject</span>(STA_final, <span class="at">file =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.Rbin&quot;</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">saveObject</span>(STA_final, <span class="at">file =</span> <span class="fu">paste0</span>(dir_out, <span class="st">&quot;/ISEA_use-wear_STA.Rbin&quot;</span>))</span></code></pre></div>
 <p>Rbin files (e.g. <code>ISEA_use-wear_STA.Rbin</code>) can be easily
 read into an R object (e.g. <code>rbin_data</code>) using the following
 code:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>rbin_data <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="st">&quot;ISEA_use-wear_STA.Rbin&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">library</span>(R.utils)</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>rbin_data <span class="ot">&lt;-</span> <span class="fu">loadObject</span>(<span class="st">&quot;ISEA_use-wear_STA.Rbin&quot;</span>)</span></code></pre></div>
 <hr />
 </div>
 </div>
 <div id="sessioninfo" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> sessionInfo()</h1>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>R version 4.4.0 (2024-04-24 ucrt)
 Platform: x86_64-w64-mingw32/x64
 Running under: Windows 10 x64 (build 19045)

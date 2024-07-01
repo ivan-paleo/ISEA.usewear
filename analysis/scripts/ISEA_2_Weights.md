@@ -1,7 +1,7 @@
 Plot tools’ weights dataset for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-27 17:56:19 CEST
+2024-07-01 08:52:55 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -115,7 +115,7 @@ head(weights)
 ## Change names of chert types
 
 ``` r
-weights$Chert_type <- factor(weights$Chert_type, labels = c("Coarser", "Finer")) %>% 
+weights$Chert_type <- factor(weights$Chert_type, levels = c("A", "B"), labels = c("Coarser", "Finer")) %>% 
                       as.character()
 str(weights)
 ```

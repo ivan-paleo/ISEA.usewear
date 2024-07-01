@@ -2,7 +2,7 @@ Import dataset from the surface texture analysis for the ISEA use-wear
 project
 ================
 Ivan Calandra
-2024-06-24 14:02:08 CEST
+2024-07-01 08:58:15 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -16,6 +16,7 @@ Ivan Calandra
   - [Extract units](#extract-units)
   - [Split column ‘Name’](#split-column-name)
   - [Split column ‘Specimen’](#split-column-specimen)
+  - [Change names of chert types](#change-names-of-chert-types)
   - [Add columns with sample ID and bamboo
     species](#add-columns-with-sample-id-and-bamboo-species)
   - [Keep only numerical parts in columns “Location” and
@@ -341,6 +342,13 @@ STA_keep[c("Chert_type", "Chert_tool")] <- STA_keep$Specimen %>%
                                            str_split("(?<=[A-Z]{1})", simplify = TRUE)
 ```
 
+## Change names of chert types
+
+``` r
+STA_keep$Chert_type <- factor(STA_keep$Chert_type, levels = c("A", "B"), labels = c("Coarser", "Finer")) %>% 
+                       as.character()
+```
+
 ## Add columns with sample ID and bamboo species
 
 ``` r
@@ -391,7 +399,7 @@ str(STA_final)
 
     'data.frame':   96 obs. of  44 variables:
      $ Sample                  : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
-     $ Chert_type              : chr  "A" "A" "A" "A" ...
+     $ Chert_type              : chr  "Coarser" "Coarser" "Coarser" "Coarser" ...
      $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
      $ Bamboo_sp               : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
      $ Objective               : chr  "20x-0.70" "20x-0.70" "20x-0.70" "20x-0.70" ...
@@ -442,12 +450,12 @@ head(STA_final)
 ```
 
         Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
-    1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
-    6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+    1 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    2 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    3 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    4 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    5 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
+    6 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
       Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
     1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
     2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532

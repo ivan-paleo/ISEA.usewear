@@ -81,7 +81,7 @@ head(weights)
 
 ## Change names of chert types
 ```{r}
-weights$Chert_type <- factor(weights$Chert_type, labels = c("Coarser", "Finer")) %>% 
+weights$Chert_type <- factor(weights$Chert_type, levels = c("A", "B"), labels = c("Coarser", "Finer")) %>% 
                       as.character()
 str(weights)
 head(weights)

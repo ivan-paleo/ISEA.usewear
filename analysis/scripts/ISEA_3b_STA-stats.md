@@ -2,7 +2,7 @@ Summary statistics on the surface texture parameters for the ISEA
 use-wear project
 ================
 Ivan Calandra
-2024-06-24 14:30:18 CEST
+2024-07-01 08:59:24 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -72,7 +72,7 @@ str(STA)
 
     'data.frame':   96 obs. of  44 variables:
      $ Sample                  : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
-     $ Chert_type              : chr  "A" "A" "A" "A" ...
+     $ Chert_type              : chr  "Coarser" "Coarser" "Coarser" "Coarser" ...
      $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
      $ Bamboo_sp               : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
      $ Objective               : chr  "20x-0.70" "20x-0.70" "20x-0.70" "20x-0.70" ...
@@ -123,12 +123,12 @@ head(STA)
 ```
 
         Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
-    1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
-    6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+    1 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    2 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    3 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    4 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    5 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
+    6 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
       Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
     1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
     2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532
@@ -212,10 +212,10 @@ stats_chert[1:3]
 ```
 
       Chert_type Strokes NMP.n
-    1          A       0    24
-    2          A    2000    24
-    3          B       0    24
-    4          B    2000    24
+    1    Coarser       0    24
+    2    Coarser    2000    24
+    3      Finer       0    24
+    4      Finer    2000    24
 
 ``` r
 # Compute summary statistics based on Bamboo_sp and Strokes
@@ -237,14 +237,14 @@ stats_chert_bamboo[1:4]
 ```
 
       Chert_type          Bamboo_sp Strokes NMP.n
-    1          A   Bambusa blumeana       0    12
-    2          A   Bambusa blumeana    2000    12
-    3          A Schizostachum lima       0    12
-    4          A Schizostachum lima    2000    12
-    5          B   Bambusa blumeana       0    12
-    6          B   Bambusa blumeana    2000    12
-    7          B Schizostachum lima       0    12
-    8          B Schizostachum lima    2000    12
+    1    Coarser   Bambusa blumeana       0    12
+    2    Coarser   Bambusa blumeana    2000    12
+    3    Coarser Schizostachum lima       0    12
+    4    Coarser Schizostachum lima    2000    12
+    5      Finer   Bambusa blumeana       0    12
+    6      Finer   Bambusa blumeana    2000    12
+    7      Finer Schizostachum lima       0    12
+    8      Finer Schizostachum lima    2000    12
 
 ## Save as XLSX
 

@@ -1576,7 +1576,7 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Plot tools’ weights dataset for the ISEA
 use-wear project</h1>
 <h4 class="author">Ivan Calandra</h4>
-<h4 class="date">2024-06-27 17:56:13 CEST</h4>
+<h4 class="date">2024-07-01 08:52:46 CEST</h4>
 
 </div>
 
@@ -1655,7 +1655,7 @@ data</h1>
 <div id="change-names-of-chert-types" class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Change names of chert
 types</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>weights<span class="sc">$</span>Chert_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(weights<span class="sc">$</span>Chert_type, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Coarser&quot;</span>, <span class="st">&quot;Finer&quot;</span>)) <span class="sc">%&gt;%</span> </span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>weights<span class="sc">$</span>Chert_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(weights<span class="sc">$</span>Chert_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Coarser&quot;</span>, <span class="st">&quot;Finer&quot;</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                      <span class="fu">as.character</span>()</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">str</span>(weights)</span></code></pre></div>
 <pre><code>&#39;data.frame&#39;:   12 obs. of  6 variables:

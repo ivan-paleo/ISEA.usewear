@@ -1,7 +1,7 @@
 Plots for the ISEA use-wear dataset
 ================
 Ivan Calandra
-2024-06-27 17:40:56 CEST
+2024-07-01 09:00:31 CEST
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -83,7 +83,7 @@ str(STA)
 
     'data.frame':   96 obs. of  44 variables:
      $ Sample                  : chr  "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" "ISEA-EX1" ...
-     $ Chert_type              : chr  "A" "A" "A" "A" ...
+     $ Chert_type              : chr  "Coarser" "Coarser" "Coarser" "Coarser" ...
      $ Chert_tool              : num  1 1 1 1 1 1 1 1 2 2 ...
      $ Bamboo_sp               : chr  "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" "Bambusa blumeana" ...
      $ Objective               : chr  "20x-0.70" "20x-0.70" "20x-0.70" "20x-0.70" ...
@@ -134,12 +134,12 @@ head(STA)
 ```
 
         Sample Chert_type Chert_tool        Bamboo_sp Objective    Side Location
-    1 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    2 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        1
-    3 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    4 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70  dorsal        2
-    5 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
-    6 ISEA-EX1          A          1 Bambusa blumeana  20x-0.70 ventral        1
+    1 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    2 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        1
+    3 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    4 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70  dorsal        2
+    5 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
+    6 ISEA-EX1    Coarser          1 Bambusa blumeana  20x-0.70 ventral        1
       Strokes       NMP       Sq        Ssk      Sku        Sp        Sv       Sz
     1       0 0.1999580 357.3100  0.2142039 3.572470 1419.5761 1545.3036 2964.880
     2    2000 0.1999580 191.0983 -1.1130610 5.748940  461.6364  914.8954 1376.532
