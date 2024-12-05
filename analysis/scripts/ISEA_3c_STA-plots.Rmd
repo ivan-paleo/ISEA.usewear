@@ -235,6 +235,13 @@ STA_pca_data <- select(STA, !c(Chert_tool, NMP)) %>%
                 # Apply function fun_minus to each group
                 summarize(across(where(is.numeric), fun_minus)) %>% 
   
+                # Add column combining Bamboo_sp and Chert_type for plotting
+                mutate(Bamboo_chert = paste(Bamboo_sp, " / ", Chert_type, " chert", sep = "")) %>%
+  
+                mutate(Bamboo_chert = gsub("Bambusa", "B.", Bamboo_chert)) %>%
+  
+                mutate(Bamboo_chert = gsub("Schizostachum", "S.", Bamboo_chert)) %>%
+  
                 # Remove rows with NA
                 na.omit() 
 ```
@@ -266,67 +273,44 @@ print(pca_STA_eig)
 #### Plotting function
 ```{r}
 custom_pca_biplot <- function(dat, datpca, pc = c(1, 2), geom.pt = "point", col.pt, mean.pt = FALSE, 
-                              col.pal = brewer.pal(3, "Set2")[1:2], pt.size = 3, pt.shape = 19, pt.fill = "white",
+                              col.pal = brewer.pal(length(unique(datpca[[col.pt]])), "RdYlBu"), 
+                              pt.size = 3, pt.shape = 19, pt.fill = "white",
                               elli = TRUE, elli.type = "convex", repel.lab = TRUE, 
-                              col.variable = "black", main.title, legend_title = col.pt){
+                              col.variable = "black", main.title){
   
   # Define plotting
   p_out <- fviz_pca_biplot(dat, axes = pc, 
                            geom.ind = geom.pt, col.ind = datpca[[col.pt]], mean.point = mean.pt,
                            palette = col.pal, pointsize = pt.size, pointshape = pt.shape, fill.ind = pt.fill,
                            addEllipses = elli, ellipse.type = elli.type,  
-                           repel = repel.lab, col.var = col.variable, 
-                           legend.title = legend_title, title = main.title)
+                           repel = repel.lab, col.var = col.variable, title = main.title, legend.title = "")
+  
+  p_out <- p_out + theme(legend.position = "bottom")
 
   # Return plotting object
   return(p_out)
 }
 ```
 
-#### Biplot with grouping from Chert_type
+#### Biplots 
 ```{r}
-# Define grouping variable
-grp_c <- "Chert_type"
-grp_c_leg <- gsub("_", " ", grp_c)
+# Define grouping variable and titles
+grp_PCA <- "Bamboo_chert"
 
 # Biplot of PC1&2
-pca_STA_chert_12 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 2), col.pt = grp_c,
-                                      main.title = paste0("PCA - ",  grp_c_leg), 
-                                      legend_title = grp_c_leg)
-print(pca_STA_chert_12)
+pca_STA_12 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 2), col.pt = grp_PCA,
+                                main.title = "PC 1&2")
+print(pca_STA_12)
 
 # Biplot of PC1&3
-pca_STA_chert_13 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 3), col.pt = grp_c,
-                                      main.title = paste0("PCA - ",  grp_c_leg), 
-                                      legend_title = grp_c_leg)
-print(pca_STA_chert_13)
-```
-
-#### Biplot with grouping from Bamboo species
-```{r}
-# Define grouping variable
-grp_b <- "Bamboo_sp"
-grp_b_leg <- gsub("_", " ", grp_b) %>% 
-             gsub("sp", "species", .)
-
-# Biplot of PC1&2
-pca_STA_bamboo_12 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 2), col.pt = grp_b,
-                                       main.title = paste0("PCA - ",  grp_b_leg), 
-                                       legend_title = grp_b_leg) +
-                     guides(color = guide_legend(theme = theme(legend.text = element_text(face = "italic"))))
-print(pca_STA_bamboo_12)
-
-# Biplot of PC1&3
-pca_STA_bamboo_13 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 3), col.pt = grp_b,
-                                       main.title = paste0("PCA - ",  grp_b_leg), 
-                                       legend_title = grp_b_leg) +
-                     guides(color = guide_legend(theme = theme(legend.text = element_text(face = "italic"))))
-print(pca_STA_bamboo_13)
+pca_STA_13 <- custom_pca_biplot(pca_STA, datpca = STA_pca_data, pc = c(1, 3), col.pt = grp_PCA,
+                                main.title = "PC 1&3")
+print(pca_STA_13)
 ```
 
 ### Combine plots to save them into 1 file
 ```{r}
-all_plots <- list(pca_STA_eig, pca_STA_chert_12, pca_STA_chert_13, pca_STA_bamboo_12, pca_STA_bamboo_13)  
+all_plots <- list(pca_STA_eig, pca_STA_12, pca_STA_13)  
 ```
 
 ### Save plots
