@@ -1,6 +1,6 @@
 # ISEA use-wear
 Ivan Calandra
-, 2025-01-06, 17:07:22
+, 2025-01-06, 17:21:39
 
 - [How to cite](#how-to-cite)
 - [Contents](#contents)
@@ -10,7 +10,6 @@ Ivan Calandra
 - [Contributions](#contributions)
 - [References](#references)
 
-*The releases are available and citable on Zenodo*  
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14605779.svg)](https://doi.org/10.5281/zenodo.14605779)
 
 This repository contains the data and code for our paper:
@@ -29,7 +28,7 @@ Please cite this compendium as:
 > Sriwigati, Geromiano M, Clamor WL, Pawlik A & Calandra I (2025).
 > Compendium of R code and data for *Making the cut: experimental bamboo
 > processing using chert tools from Island Southeast Asia*. Accessed 06
-> Jan 2025. Online at <https://doi.org/xxx/xxx>
+> Jan 2025. Online at <https://doi.org/10.5281/zenodo.14605779>
 
 # Contents
 

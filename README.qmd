@@ -17,7 +17,6 @@ Authors <- "Fuentes R, Marreiros J, Kullmer O, Gneisinger G, Ono R, Aziz N, Sriw
 repo <- basename(getwd())
 ```
 
-*The releases are available and citable on Zenodo*  
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14605779.svg)](https://doi.org/10.5281/zenodo.14605779)
 
 This repository contains the data and code for our paper:
@@ -28,7 +27,7 @@ This repository contains the data and code for our paper:
 # How to cite
 Please cite this compendium as:
 
-> `r Authors` (`r format(Sys.Date(), "%Y")`). Compendium of R code and data for *`r Title`*. Accessed `r format(Sys.Date(), "%d %b %Y")`. Online at <https://doi.org/xxx/xxx>
+> `r Authors` (`r format(Sys.Date(), "%Y")`). Compendium of R code and data for *`r Title`*. Accessed `r format(Sys.Date(), "%d %b %Y")`. Online at <https://doi.org/10.5281/zenodo.14605779>
 
 
 # Contents
