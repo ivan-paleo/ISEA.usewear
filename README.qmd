@@ -20,15 +20,14 @@ repo <- basename(getwd())
 *The releases are available and citable on Zenodo*  
 
 
-# ISEA.usewear
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ivan-paleo/ISEA.usewear/master?urlpath=rstudio)
-
 This repository contains the data and code for our paper:
+
 > `r Authors` (to be submitted). `r Title`. *Name of journal: TBA* <https://doi.org/xxx/xxx>
 
 
 # How to cite
 Please cite this compendium as:
+
 > `r Authors` (`r format(Sys.Date(), "%Y")`). Compendium of R code and data for *`r Title`*. Accessed `r format(Sys.Date(), "%d %b %Y")`. Online at <https://doi.org/xxx/xxx>
 
 

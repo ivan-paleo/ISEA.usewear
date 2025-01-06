@@ -1,8 +1,7 @@
 # ISEA use-wear
 Ivan Calandra
-, 2025-01-06, 16:49:28
+, 2025-01-06, 16:59:55
 
-- [ISEA.usewear](#iseausewear)
 - [How to cite](#how-to-cite)
 - [Contents](#contents)
 - [How to run in your browser or download and run
@@ -13,23 +12,23 @@ Ivan Calandra
 
 *The releases are available and citable on Zenodo*
 
-# ISEA.usewear
+This repository contains the data and code for our paper:
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ivan-paleo/ISEA.usewear/master?urlpath=rstudio)
-
-This repository contains the data and code for our paper: \> Fuentes R,
-Marreiros J, Kullmer O, Gneisinger G, Ono R, Aziz N, Sriwigati,
-Geromiano M, Clamor WL, Pawlik A & Calandra I (to be submitted). Making
-the cut: experimental bamboo processing using chert tools from Island
-Southeast Asia. *Name of journal: TBA* <https://doi.org/xxx/xxx>
+> Fuentes R, Marreiros J, Kullmer O, Gneisinger G, Ono R, Aziz N,
+> Sriwigati, Geromiano M, Clamor WL, Pawlik A & Calandra I (to be
+> submitted). Making the cut: experimental bamboo processing using chert
+> tools from Island Southeast Asia. *Name of journal: TBA*
+> <https://doi.org/xxx/xxx>
 
 # How to cite
 
-Please cite this compendium as: \> Fuentes R, Marreiros J, Kullmer O,
-Gneisinger G, Ono R, Aziz N, Sriwigati, Geromiano M, Clamor WL, Pawlik A
-& Calandra I (2025). Compendium of R code and data for *Making the cut:
-experimental bamboo processing using chert tools from Island Southeast
-Asia*. Accessed 06 Jan 2025. Online at <https://doi.org/xxx/xxx>
+Please cite this compendium as:
+
+> Fuentes R, Marreiros J, Kullmer O, Gneisinger G, Ono R, Aziz N,
+> Sriwigati, Geromiano M, Clamor WL, Pawlik A & Calandra I (2025).
+> Compendium of R code and data for *Making the cut: experimental bamboo
+> processing using chert tools from Island Southeast Asia*. Accessed 06
+> Jan 2025. Online at <https://doi.org/xxx/xxx>
 
 # Contents
 
