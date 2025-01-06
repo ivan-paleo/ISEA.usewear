@@ -7,6 +7,7 @@ format:
   gfm: default
 toc: true
 toc-depth: 2
+number-sections: true
 ---
 
 
@@ -49,7 +50,7 @@ The [analysis](/analysis) directory contains all files related to the R analysis
 
 The [scripts](/analysis/scripts) directory contains the following files:
 
-- [ISEA_0_CreateRC.Rmd](/analysis/scripts/ISEA_0_CreateRC.Rmd): script used to create this research compendium - it is not part of the analysis *per se* and is not meant to be run again. Rendered to [ISEA_0_CreateRC.html](/analysis/scripts/ISEA_0_CreateRC.html) and [ISEA_0_CreateRC.md](/analysis/scripts/ISEA_0_CreateRC.md). The references are exported to a BIB file ([ISEA_0_CreateRC.bib](/analysis/scripts/ISEA_0_CreateRC.bib)).    
+- [ISEA_0_CreateRC.Rmd](/analysis/scripts/ISEA_0_CreateRC.Rmd): script used to create this research compendium - it is not part of the analysis *per se* and is not meant to be run again. Rendered to MD and HTML files; the references are exported to a BIB file.   
 - [ISEA_1a_Smarttester-import.Rmd](/analysis/scripts/ISEA_1a_Smarttester-import.Rmd): script to import the sensors' data from the robotic experiment with the Smarttester material tester. Rendered to MD and HTML files; the references are exported to a BIB file.  
 - [ISEA_1b_Smarttester-plot.Rmd](/analysis/scripts/ISEA_1b_Smarttester-plot.Rmd): script to plot the sensors' data from the robotic experiment with the Smarttester. Rendered to MD (+ associated PNG files of the plots in the folder [ISEA_1b_Smarttester-plot_files](/analysis/scripts/ISEA_1b_Smarttester-plot_files/figure-gfm/)) and HTML files; the references are exported to a BIB file.  
 - [ISEA_2_Weights.Rmd](/analysis/scripts/ISEA_2_Weights.Rmd): script to import and plot the tools’ weights before and after the experiments. Rendered to MD (+ associated PNG files of the plots in the folder [ISEA_2_Weights_files](/analysis/scripts/ISEA_2_Weights_files/figure-gfm/)) and HTML files; the references are exported to a BIB file.  
@@ -68,7 +69,7 @@ See the section [Contributions](#contributions) for details on the [CONDUCT.md](
 
 
 # How to run in your browser or download and run locally
-This research compendium has been developed using the statistical programming languages R. To work with the compendium, you will need to install on your computer the [R software](https://cloud.r-project.org/) and [RStudio Desktop](https://rstudio.com/products/rstudio/download/).
+This research compendium has been developed using the statistical programming languages R. To work with the compendium, you will need to install on your computer the [R software](https://cloud.r-project.org/) and [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
 
 To work locally with the R analysis, either from the ZIP archive or from cloning the GitHub repository to your computer:
 

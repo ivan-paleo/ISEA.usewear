@@ -1,15 +1,17 @@
 # ISEA use-wear
 Ivan Calandra
-, 2025-01-06, 16:35:18
+, 2025-01-06, 16:45:17
 
-- [ISEA.usewear](#iseausewear)
-- [How to cite](#how-to-cite)
-- [Contents](#contents)
-- [How to run in your browser or download and run
+- [<span class="toc-section-number">1</span> ISEA.usewear](#iseausewear)
+- [<span class="toc-section-number">2</span> How to cite](#how-to-cite)
+- [<span class="toc-section-number">3</span> Contents](#contents)
+- [<span class="toc-section-number">4</span> How to run in your browser
+  or download and run
   locally](#how-to-run-in-your-browser-or-download-and-run-locally)
-- [License](#license)
-- [Contributions](#contributions)
-- [References](#references)
+- [<span class="toc-section-number">5</span> License](#license)
+- [<span class="toc-section-number">6</span>
+  Contributions](#contributions)
+- [<span class="toc-section-number">7</span> References](#references)
 
 *The releases are available and citable on Zenodo*
 
@@ -61,11 +63,8 @@ The [scripts](/analysis/scripts) directory contains the following files:
 
 - [ISEA_0_CreateRC.Rmd](/analysis/scripts/ISEA_0_CreateRC.Rmd): script
   used to create this research compendium - it is not part of the
-  analysis *per se* and is not meant to be run again. Rendered to
-  [ISEA_0_CreateRC.html](/analysis/scripts/ISEA_0_CreateRC.html) and
-  [ISEA_0_CreateRC.md](/analysis/scripts/ISEA_0_CreateRC.md). The
-  references are exported to a BIB file
-  ([ISEA_0_CreateRC.bib](/analysis/scripts/ISEA_0_CreateRC.bib)).  
+  analysis *per se* and is not meant to be run again. Rendered to MD and
+  HTML files; the references are exported to a BIB file.  
 - [ISEA_1a_Smarttester-import.Rmd](/analysis/scripts/ISEA_1a_Smarttester-import.Rmd):
   script to import the sensors’ data from the robotic experiment with
   the Smarttester material tester. Rendered to MD and HTML files; the
@@ -120,7 +119,7 @@ See the section [Contributions](#contributions) for details on the
 This research compendium has been developed using the statistical
 programming languages R. To work with the compendium, you will need to
 install on your computer the [R software](https://cloud.r-project.org/)
-and [RStudio Desktop](https://rstudio.com/products/rstudio/download/).
+and [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
 
 To work locally with the R analysis, either from the ZIP archive or from
 cloning the GitHub repository to your computer:
