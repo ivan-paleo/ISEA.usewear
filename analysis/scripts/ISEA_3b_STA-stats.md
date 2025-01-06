@@ -2,7 +2,7 @@ Summary statistics on the surface texture parameters for the ISEA
 use-wear project
 ================
 Ivan Calandra
-2024-07-01 08:59:24 CEST
+2025-01-06 15:47:35 CET
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -262,7 +262,7 @@ write_xlsx(list("Chert+Strokes" = stats_chert, "Bamboo+Strokes" = stats_bamboo,
 sessionInfo()
 ```
 
-    R version 4.4.0 (2024-04-24 ucrt)
+    R version 4.4.2 (2024-10-31 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -283,47 +283,47 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base     
 
     other attached packages:
-     [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
+     [1] writexl_1.5.1     lubridate_1.9.4   forcats_1.0.0     stringr_1.5.1    
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
-     [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27   
-    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
-    [17] grateful_0.2.7    doBy_4.6.21      
+     [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.29   
+    [13] R.utils_2.12.3    R.oo_1.27.0       R.methodsS3_1.8.2 knitr_1.49       
+    [17] grateful_0.2.10   doBy_4.6.24      
 
     loaded via a namespace (and not attached):
-     [1] sass_0.4.9            utf8_1.2.4            generics_0.1.3       
-     [4] stringi_1.8.4         lattice_0.22-6        hms_1.1.3            
-     [7] digest_0.6.35         magrittr_2.0.3        timechange_0.3.0     
-    [10] evaluate_0.23         grid_4.4.0            fastmap_1.2.0        
-    [13] rprojroot_2.0.4       jsonlite_1.8.8        Matrix_1.7-0         
-    [16] backports_1.5.0       fansi_1.0.6           scales_1.3.0         
-    [19] modelr_0.1.11         microbenchmark_1.4.10 jquerylib_0.1.4      
-    [22] cli_3.6.2             rlang_1.1.4           cowplot_1.1.3        
-    [25] munsell_0.5.1         withr_3.0.0           cachem_1.1.0         
-    [28] yaml_2.3.8            tools_4.4.0           tzdb_0.4.0           
-    [31] colorspace_2.1-0      boot_1.3-30           Deriv_4.1.3          
-    [34] broom_1.0.6           vctrs_0.6.5           R6_2.5.1             
-    [37] lifecycle_1.0.4       MASS_7.3-60.2         pkgconfig_2.0.3      
-    [40] pillar_1.9.0          bslib_0.7.0           gtable_0.3.5         
-    [43] glue_1.7.0            xfun_0.44             tidyselect_1.2.1     
-    [46] rstudioapi_0.16.0     htmltools_0.5.8.1     compiler_4.4.0       
+     [1] sass_0.4.9           generics_0.1.3       stringi_1.8.4       
+     [4] lattice_0.22-6       hms_1.1.3            digest_0.6.37       
+     [7] magrittr_2.0.3       timechange_0.3.0     evaluate_1.0.1      
+    [10] grid_4.4.2           fastmap_1.2.0        rprojroot_2.0.4     
+    [13] jsonlite_1.8.9       Matrix_1.7-1         backports_1.5.0     
+    [16] scales_1.3.0         modelr_0.1.11        microbenchmark_1.5.0
+    [19] jquerylib_0.1.4      cli_3.6.3            rlang_1.1.4         
+    [22] crayon_1.5.3         cowplot_1.1.3        munsell_0.5.1       
+    [25] withr_3.0.2          cachem_1.1.0         yaml_2.3.10         
+    [28] tools_4.4.2          tzdb_0.4.0           colorspace_2.1-1    
+    [31] boot_1.3-31          Deriv_4.1.6          broom_1.0.7         
+    [34] vctrs_0.6.5          R6_2.5.1             lifecycle_1.0.4     
+    [37] MASS_7.3-63          pkgconfig_2.0.3      pillar_1.10.0       
+    [40] bslib_0.8.0          gtable_0.3.6         glue_1.8.0          
+    [43] xfun_0.49            tidyselect_1.2.1     rstudioapi_0.17.1   
+    [46] htmltools_0.5.8.1    compiler_4.4.2      
 
 ------------------------------------------------------------------------
 
 # Cite R packages used
 
-| Package     | Version      | Citation                                                                                      |
-|:------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.4.0        | R Core Team (2024)                                                                            |
-| doBy        | 4.6.21       | Højsgaard and Halekoh (2024)                                                                  |
-| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
-| knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
-| R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
-| R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
-| R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
-| rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
-| tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
-| writexl     | 1.5.0        | Ooms (2024)                                                                                   |
-| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
+| Package | Version | Citation |
+|:---|:---|:---|
+| base | 4.4.2 | R Core Team (2024) |
+| doBy | 4.6.24 | Halekoh and Højsgaard (2024) |
+| grateful | 0.2.10 | Rodriguez-Sanchez and Jackson (2024) |
+| knitr | 1.49 | Xie (2014); Xie (2015); Xie (2024) |
+| R.methodsS3 | 1.8.2 | Bengtsson (2003a) |
+| R.oo | 1.27.0 | Bengtsson (2003b) |
+| R.utils | 2.12.3 | Bengtsson (2023) |
+| rmarkdown | 2.29 | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
+| tidyverse | 2.0.0 | Wickham et al. (2019) |
+| writexl | 1.5.1 | Ooms (2024) |
+| RStudio | 2024.9.1.394 | Posit team (2024) |
 
 ## References
 
@@ -372,7 +372,7 @@ Utilities*. <https://CRAN.R-project.org/package=R.utils>.
 
 <div id="ref-doBy" class="csl-entry">
 
-Højsgaard, Søren, and Ulrich Halekoh. 2024.
+Halekoh, Ulrich, and Søren Højsgaard. 2024.
 *<span class="nocase">doBy</span>: Groupwise Statistics, LSmeans, Linear
 Estimates, Utilities*. <https://CRAN.R-project.org/package=doBy>.
 
@@ -403,8 +403,8 @@ Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 
 <div id="ref-grateful" class="csl-entry">
 
-Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
-*<span class="nocase">grateful</span>: Facilitate Citation of r
+Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2024.
+*<span class="nocase">grateful</span>: Facilitate Citation of R
 Packages*. <https://pakillo.github.io/grateful/>.
 
 </div>

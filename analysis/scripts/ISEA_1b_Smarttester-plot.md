@@ -1,7 +1,7 @@
 Plot Smarttester’s sensor data for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 17:39:27 CEST
+2025-01-06 15:45:10 CET
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -437,7 +437,7 @@ ggsave(filename = "ISEA_use-wear_Smarttester-plots_50strokes.pdf",
 sessionInfo()
 ```
 
-    R version 4.4.0 (2024-04-24 ucrt)
+    R version 4.4.2 (2024-10-31 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -458,43 +458,43 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base     
 
     other attached packages:
-     [1] viridis_0.6.5     viridisLite_0.4.2 lubridate_1.9.3   forcats_1.0.0    
+     [1] viridis_0.6.5     viridisLite_0.4.2 lubridate_1.9.4   forcats_1.0.0    
      [5] stringr_1.5.1     dplyr_1.1.4       purrr_1.0.2       readr_2.1.5      
-     [9] tidyr_1.3.1       tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.27   
-    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
-    [17] gridExtra_2.3     grateful_0.2.7    ggplot2_3.5.1    
+     [9] tidyr_1.3.1       tibble_3.2.1      tidyverse_2.0.0   rmarkdown_2.29   
+    [13] R.utils_2.12.3    R.oo_1.27.0       R.methodsS3_1.8.2 knitr_1.49       
+    [17] gridExtra_2.3     grateful_0.2.10   ggplot2_3.5.1    
 
     loaded via a namespace (and not attached):
-     [1] sass_0.4.9        utf8_1.2.4        generics_0.1.3    stringi_1.8.4    
-     [5] hms_1.1.3         digest_0.6.35     magrittr_2.0.3    evaluate_0.23    
-     [9] grid_4.4.0        timechange_0.3.0  fastmap_1.2.0     rprojroot_2.0.4  
-    [13] jsonlite_1.8.8    fansi_1.0.6       scales_1.3.0      textshaping_0.4.0
-    [17] jquerylib_0.1.4   cli_3.6.2         rlang_1.1.4       munsell_0.5.1    
-    [21] withr_3.0.0       cachem_1.1.0      yaml_2.3.8        tools_4.4.0      
-    [25] tzdb_0.4.0        colorspace_2.1-0  vctrs_0.6.5       R6_2.5.1         
-    [29] lifecycle_1.0.4   ragg_1.3.2        pkgconfig_2.0.3   pillar_1.9.0     
-    [33] bslib_0.7.0       gtable_0.3.5      glue_1.7.0        systemfonts_1.1.0
-    [37] highr_0.11        xfun_0.44         tidyselect_1.2.1  rstudioapi_0.16.0
-    [41] farver_2.1.2      htmltools_0.5.8.1 labeling_0.4.3    compiler_4.4.0   
+     [1] sass_0.4.9        generics_0.1.3    stringi_1.8.4     hms_1.1.3        
+     [5] digest_0.6.37     magrittr_2.0.3    evaluate_1.0.1    grid_4.4.2       
+     [9] timechange_0.3.0  fastmap_1.2.0     rprojroot_2.0.4   jsonlite_1.8.9   
+    [13] scales_1.3.0      textshaping_0.4.1 jquerylib_0.1.4   cli_3.6.3        
+    [17] rlang_1.1.4       crayon_1.5.3      munsell_0.5.1     withr_3.0.2      
+    [21] cachem_1.1.0      yaml_2.3.10       tools_4.4.2       tzdb_0.4.0       
+    [25] colorspace_2.1-1  vctrs_0.6.5       R6_2.5.1          lifecycle_1.0.4  
+    [29] ragg_1.3.3        pkgconfig_2.0.3   pillar_1.10.0     bslib_0.8.0      
+    [33] gtable_0.3.6      glue_1.8.0        systemfonts_1.1.0 xfun_0.49        
+    [37] tidyselect_1.2.1  rstudioapi_0.17.1 farver_2.1.2      htmltools_0.5.8.1
+    [41] labeling_0.4.3    compiler_4.4.2   
 
 ------------------------------------------------------------------------
 
 # Cite R packages used
 
-| Package     | Version      | Citation                                                                                      |
-|:------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.4.0        | R Core Team (2024)                                                                            |
-| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
-| gridExtra   | 2.3          | Auguie (2017)                                                                                 |
-| knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
-| R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
-| R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
-| R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
-| rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
-| tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
-| viridis     | 0.6.5        | Garnier et al. (2024)                                                                         |
-| viridisLite | 0.4.2        | Garnier et al. (2023)                                                                         |
-| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
+| Package | Version | Citation |
+|:---|:---|:---|
+| base | 4.4.2 | R Core Team (2024) |
+| grateful | 0.2.10 | Rodriguez-Sanchez and Jackson (2024) |
+| gridExtra | 2.3 | Auguie (2017) |
+| knitr | 1.49 | Xie (2014); Xie (2015); Xie (2024) |
+| R.methodsS3 | 1.8.2 | Bengtsson (2003a) |
+| R.oo | 1.27.0 | Bengtsson (2003b) |
+| R.utils | 2.12.3 | Bengtsson (2023) |
+| rmarkdown | 2.29 | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
+| tidyverse | 2.0.0 | Wickham et al. (2019) |
+| viridis | 0.6.5 | Garnier et al. (2024) |
+| viridisLite | 0.4.2 | Garnier et al. (2023) |
+| RStudio | 2024.9.1.394 | Posit team (2024) |
 
 ## References
 
@@ -582,8 +582,8 @@ Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 
 <div id="ref-grateful" class="csl-entry">
 
-Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
-*<span class="nocase">grateful</span>: Facilitate Citation of r
+Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2024.
+*<span class="nocase">grateful</span>: Facilitate Citation of R
 Packages*. <https://pakillo.github.io/grateful/>.
 
 </div>

@@ -1,7 +1,7 @@
 Import dataset from Smarttester’s sensors for the ISEA use-wear project
 ================
 Ivan Calandra
-2024-06-24 11:53:50 CEST
+2025-01-06 15:42:09 CET
 
 - [Goal of the script](#goal-of-the-script)
 - [Load packages](#load-packages)
@@ -552,7 +552,7 @@ rbin_data <- loadObject("ISEA_use-wear_Smarttester.Rbin")
 sessionInfo()
 ```
 
-    R version 4.4.0 (2024-04-24 ucrt)
+    R version 4.4.2 (2024-10-31 ucrt)
     Platform: x86_64-w64-mingw32/x64
     Running under: Windows 10 x64 (build 19045)
 
@@ -573,40 +573,40 @@ sessionInfo()
     [1] stats     graphics  grDevices utils     datasets  methods   base     
 
     other attached packages:
-     [1] writexl_1.5.0     lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1    
+     [1] writexl_1.5.1     lubridate_1.9.4   forcats_1.0.0     stringr_1.5.1    
      [5] dplyr_1.1.4       purrr_1.0.2       readr_2.1.5       tidyr_1.3.1      
-     [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.27   
-    [13] R.utils_2.12.3    R.oo_1.26.0       R.methodsS3_1.8.2 knitr_1.47       
-    [17] grateful_0.2.7   
+     [9] tibble_3.2.1      ggplot2_3.5.1     tidyverse_2.0.0   rmarkdown_2.29   
+    [13] R.utils_2.12.3    R.oo_1.27.0       R.methodsS3_1.8.2 knitr_1.49       
+    [17] grateful_0.2.10  
 
     loaded via a namespace (and not attached):
-     [1] gtable_0.3.5      jsonlite_1.8.8    compiler_4.4.0    tidyselect_1.2.1 
-     [5] jquerylib_0.1.4   scales_1.3.0      yaml_2.3.8        fastmap_1.2.0    
-     [9] R6_2.5.1          generics_0.1.3    munsell_0.5.1     rprojroot_2.0.4  
-    [13] tzdb_0.4.0        bslib_0.7.0       pillar_1.9.0      rlang_1.1.4      
-    [17] utf8_1.2.4        stringi_1.8.4     cachem_1.1.0      xfun_0.44        
-    [21] sass_0.4.9        timechange_0.3.0  cli_3.6.2         withr_3.0.0      
-    [25] magrittr_2.0.3    digest_0.6.35     grid_4.4.0        rstudioapi_0.16.0
-    [29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23    
-    [33] glue_1.7.0        fansi_1.0.6       colorspace_2.1-0  tools_4.4.0      
-    [37] pkgconfig_2.0.3   htmltools_0.5.8.1
+     [1] gtable_0.3.6      jsonlite_1.8.9    compiler_4.4.2    crayon_1.5.3     
+     [5] tidyselect_1.2.1  jquerylib_0.1.4   scales_1.3.0      yaml_2.3.10      
+     [9] fastmap_1.2.0     R6_2.5.1          generics_0.1.3    munsell_0.5.1    
+    [13] rprojroot_2.0.4   tzdb_0.4.0        bslib_0.8.0       pillar_1.10.0    
+    [17] rlang_1.1.4       stringi_1.8.4     cachem_1.1.0      xfun_0.49        
+    [21] sass_0.4.9        timechange_0.3.0  cli_3.6.3         withr_3.0.2      
+    [25] magrittr_2.0.3    digest_0.6.37     grid_4.4.2        rstudioapi_0.17.1
+    [29] hms_1.1.3         lifecycle_1.0.4   vctrs_0.6.5       evaluate_1.0.1   
+    [33] glue_1.8.0        colorspace_2.1-1  tools_4.4.2       pkgconfig_2.0.3  
+    [37] htmltools_0.5.8.1
 
 ------------------------------------------------------------------------
 
 # Cite R packages used
 
-| Package     | Version      | Citation                                                                                      |
-|:------------|:-------------|:----------------------------------------------------------------------------------------------|
-| base        | 4.4.0        | R Core Team (2024)                                                                            |
-| grateful    | 0.2.7        | Rodriguez-Sanchez and Jackson (2023)                                                          |
-| knitr       | 1.47         | Xie (2014); Xie (2015); Xie (2024)                                                            |
-| R.methodsS3 | 1.8.2        | Bengtsson (2003a)                                                                             |
-| R.oo        | 1.26.0       | Bengtsson (2003b)                                                                             |
-| R.utils     | 2.12.3       | Bengtsson (2023)                                                                              |
-| rmarkdown   | 2.27         | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
-| tidyverse   | 2.0.0        | Wickham et al. (2019)                                                                         |
-| writexl     | 1.5.0        | Ooms (2024)                                                                                   |
-| RStudio     | 2024.4.1.748 | Posit team (2024)                                                                             |
+| Package | Version | Citation |
+|:---|:---|:---|
+| base | 4.4.2 | R Core Team (2024) |
+| grateful | 0.2.10 | Rodriguez-Sanchez and Jackson (2024) |
+| knitr | 1.49 | Xie (2014); Xie (2015); Xie (2024) |
+| R.methodsS3 | 1.8.2 | Bengtsson (2003a) |
+| R.oo | 1.27.0 | Bengtsson (2003b) |
+| R.utils | 2.12.3 | Bengtsson (2023) |
+| rmarkdown | 2.29 | Xie, Allaire, and Grolemund (2018); Xie, Dervieux, and Riederer (2020); Allaire et al. (2024) |
+| tidyverse | 2.0.0 | Wickham et al. (2019) |
+| writexl | 1.5.1 | Ooms (2024) |
+| RStudio | 2024.9.1.394 | Posit team (2024) |
 
 ## References
 
@@ -678,8 +678,8 @@ Computing*. Vienna, Austria: R Foundation for Statistical Computing.
 
 <div id="ref-grateful" class="csl-entry">
 
-Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2023.
-*<span class="nocase">grateful</span>: Facilitate Citation of r
+Rodriguez-Sanchez, Francisco, and Connor P. Jackson. 2024.
+*<span class="nocase">grateful</span>: Facilitate Citation of R
 Packages*. <https://pakillo.github.io/grateful/>.
 
 </div>

@@ -1,0 +1,149 @@
+---
+title: "Create Research Compendium - ISEA use-wear"
+author: "Ivan Calandra"
+date: "`r format(Sys.time(), usetz = TRUE)`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    theme: cerulean
+    highlight: pygments
+    number_sections: true
+  github_document: 
+    toc: true
+    toc_depth: 2
+    html_preview: false
+bibliography: ISEA_0_CreateRC.bib
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_format = "all", knit_root_dir = rprojroot::find_rstudio_root_file()) })
+---
+
+```{r Knitr Options, include = FALSE}
+knitr::opts_chunk$set(comment = NA, message = FALSE, indent = "", error = TRUE, eval = FALSE)
+```
+
+
+---
+
+
+# Goal of the script
+Create and set up a research compendium for the paper on ISEA use-wear using the R package `rrtools`.  
+For details on rrtools, see Ben Marwick's [GitHub repository](https://github.com/benmarwick/rrtools).  
+
+Note that this script is there only to show the steps taken to create the research compendium and is not part of the analysis per se. For this reason, most of the code is not evaluated (`knitr::opts_chunk$set(eval=FALSE)`).
+
+The knit directory for this script is the project directory.
+
+
+---
+
+
+# Prerequisites
+This script requires that you have a GitHub account and that you have connected RStudio, Git and GitHub. For details on how to do it, check [Happy Git](https://happygitwithr.com/).
+
+
+---
+
+
+# Preparations
+Before running this script, the first step is to [create a repository on GitHub and to download it to RStudio](https://happygitwithr.com/new-github-first.html). In this case, the repository is called "ISEA.usewear".  
+Finally, open the RStudio project created.
+
+
+---
+
+
+# Create the research compendium
+## Load packages
+```{r, eval = TRUE}
+library(grateful)
+library(renv)
+library(rrtools)
+library(usethis)
+```
+
+
+## Create compendium
+```{r}
+rrtools::use_compendium(getwd())
+```
+A new project has opened in a new session.  
+Edit the fields "Title", "Author" and "Description" in the `DESCRIPTION` file. 
+
+
+## Create README.qmd file
+```{r}
+rrtools::use_readme_qmd()
+```
+Edit the `README.qmd` file as needed.  
+Make sure you render it to create the `README.md` file.
+
+
+## Create a folders 
+Create a folder 'analysis' and subfolders to contain raw data, derived data, plots, statistics and scripts. Also create a folder for the Python analysis:
+```{r}
+dir.create("analysis", showWarnings = FALSE)
+dir.create("analysis/raw_data", showWarnings = FALSE)
+dir.create("analysis/derived_data", showWarnings = FALSE)
+dir.create("analysis/plots", showWarnings = FALSE)
+dir.create("analysis/scripts", showWarnings = FALSE)
+dir.create("analysis/stats", showWarnings = FALSE)
+```
+Note that the folders cannot be pushed to GitHub as long as they are empty.
+
+
+## Delete file 'NAMESPACE'
+```{r}
+file.remove("NAMESPACE")
+```
+
+
+---
+
+
+# Before running the analyses
+After the creation of this research compendium, I have moved the raw, input data files to `"~/analysis/raw_data"` (as read-only files) and the R scripts to `"~/analysis/scripts"`.
+
+
+---
+
+
+# After running the analyses
+## DESCRIPTION
+Run this command to add the dependencies to the DESCRIPTION file.
+```{r}
+rrtools::add_dependencies_to_description()
+```
+
+
+## renv
+Save the state of the project library using the `renv` package.  
+```{r}
+renv::init()
+```
+
+
+---
+
+
+# sessionInfo()
+
+```{r, eval = TRUE}
+sessionInfo()
+```
+
+
+---
+
+
+# Cite R packages used
+
+```{r, echo = FALSE, eval = TRUE}
+pkgs_cite <- cite_packages(pkgs = "Session", omit = NULL, output = "table", include.RStudio = TRUE, 
+                           out.dir = "analysis/scripts", bib.file = "ISEA_0_CreateRC")
+knitr::kable(pkgs_cite)
+```
+
+
+## References

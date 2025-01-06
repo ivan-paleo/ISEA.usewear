@@ -1,0 +1,33 @@
+Package: ISEA.usewear
+Title: Research compendium of ISEA use-wear project
+Version: 1.0
+Authors@R: 
+    person("Ivan", "Calandra", , "ivan.calandra@leiza.de", role = c("aut", "cre"))
+Description: Statistical analysis of ISEA use-wear datasets
+License: CC-BY-NC-SA
+ByteCompile: true
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    devtools (>= 2.4.5),
+    doBy (>= 4.6.24),
+    factoextra (>= 1.0.7),
+    ggplot2 (>= 3.5.1),
+    ggrepel (>= 0.9.6),
+    grateful (>= 0.2.10),
+    gridExtra (>= 2.3),
+    knitr (>= 1.49),
+    patchwork (>= 1.3.0),
+    R.utils (>= 2.12.3),
+    RColorBrewer (>= 1.1-3),
+    readODS (>= 2.3.1),
+    renv (>= 1.0.11),
+    rmarkdown (>= 2.29),
+    rprojroot (>= 2.0.4),
+    rrtools (>= 0.1.6),
+    tidyverse (>= 2.0.0),
+    usethis (>= 3.1.0),
+    viridis (>= 0.6.5),
+    writexl (>= 1.5.1)

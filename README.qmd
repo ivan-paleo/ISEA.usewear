@@ -1,0 +1,100 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.qmd. Please edit that file -->
+
+```{r, echo = FALSE}
+# Please put your information here to include it in the file below.
+Title <- "Making the cut: experimental bamboo processing using chert tools from Island Southeast Asia"
+Authors <- "Fuentes R, Marreiros J, Kullmer O, Gneisinger G, Ono R, Aziz N, Sriwigati, Geromiano M, Clamor WL, Pawlik A & Calandra I"
+repo <- basename(getwd())
+```
+
+*The releases are available and citable on Zenodo*  
+
+
+# ISEA.usewear
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ivan-paleo/ISEA.usewear/master?urlpath=rstudio)
+
+This repository contains the data and code for our paper:
+> `r Authors` (to be submitted). `r Title`. *Name of journal: TBA* <https://doi.org/xxx/xxx>
+
+
+# How to cite
+Please cite this compendium as:
+> `r Authors` (`r format(Sys.Date(), "%Y")`). Compendium of R code and data for *`r Title`*. Accessed `r format(Sys.Date(), "%d %b %Y")`. Online at <https://doi.org/xxx/xxx>
+
+
+# Contents
+This [README.md](/README.md) file has been created by rendering the [README.qmd](/README.qmd) file.
+
+The [DESCRIPTION](/DESCRIPTION) file contains information about the version, author, license and packages. For details on the license, see the [LICENSE](/LICENSE) file.
+
+The [`r repo`.Rproj](/`r repo`.Rproj) file is the RStudio project file.
+
+The [analysis](/analysis) directory contains all files related to the R analysis. It is composed of the following folders:
+
+- [:file_folder: derived_data](/analysis/derived_data): output data generated during the analysis (scripts 1a, 2, 3a).  
+- [:file_folder: plots](/analysis/plots): plots generated during the analyses (scripts 1b, 2 and 3c).  
+- [:file_folder: raw_data](/analysis/raw_data): input data used in the analyses (scripts 2 and 3a).  
+- [:file_folder: scripts](/analysis/scripts): scripts used to run the analyses. See below for details.  
+- [:file_folder: stats](/analysis/stats): summary statistics generated during the analyses (scripts 2 and 3b).
+
+The [scripts](/analysis/scripts) directory contains the following files:
+
+- [ISEA_0_CreateRC.Rmd](/analysis/scripts/ISEA_0_CreateRC.Rmd): script used to create this research compendium - it is not part of the analysis *per se* and is not meant to be run again. Rendered to [ISEA_0_CreateRC.html](/analysis/scripts/ISEA_0_CreateRC.html) and [ISEA_0_CreateRC.md](/analysis/scripts/ISEA_0_CreateRC.md). The references are exported to a BIB file ([ISEA_0_CreateRC.bib](/analysis/scripts/ISEA_0_CreateRC.bib)).    
+- [ISEA_1a_Smarttester-import.Rmd](/analysis/scripts/ISEA_1a_Smarttester-import.Rmd): script to import the sensors' data from the robotic experiment with the Smarttester material tester. Rendered to MD and HTML files; the references are exported to a BIB file.  
+- [ISEA_1b_Smarttester-plot.Rmd](/analysis/scripts/ISEA_1b_Smarttester-plot.Rmd): script to plot the sensors' data from the robotic experiment with the Smarttester. Rendered to MD (+ associated PNG files of the plots in the folder [ISEA_1b_Smarttester-plot_files](/analysis/scripts/ISEA_1b_Smarttester-plot_files/figure-gfm/)) and HTML files; the references are exported to a BIB file.  
+- [ISEA_2_Weights.Rmd](/analysis/scripts/ISEA_2_Weights.Rmd): script to import and plot the tools’ weights before and after the experiments. Rendered to MD (+ associated PNG files of the plots in the folder [ISEA_2_Weights_files](/analysis/scripts/ISEA_2_Weights_files/figure-gfm/)) and HTML files; the references are exported to a BIB file.  
+- [ISEA_3a_STA-import.Rmd](/analysis/scripts/ISEA_3a_STA-import.Rmd): script to import the raw, input data from the surface texture analysis (STA). Rendered to MD and HTML files; the references are exported to a BIB file.  
+- [ISEA_3b_STA-stats.Rmd](/analysis/scripts/ISEA_3b_STA-stats.Rmd): script to compute group-wise summary statistics for the STA data. Rendered to MD and HTML files; the references are exported to a BIB file.  
+- [ISEA_3c_STA-plots.Rmd](/analysis/scripts/ISEA_3c_STA-plots.Rmd): script to produce plots for the STA data. Rendered to MD (+ associated PNG files of the plots in the folder [ISEA_3c_STA-plots_files](/analysis/scripts/ISEA_3c_STA-plots_files/figure-gfm/)) and HTML files; the references are exported to a BIB file.     
+
+Note that the HTML files are not rendered nicely on GitHub; you need to download them and open them with your browser. Use the MD files to view on GitHub. However, MD files do not have all functionalities of HTML files (numbered sections, floating table of content). I therefore recommend using the HTML files.  
+To download an HTML file from GitHub, first display the "raw" file and then save it as HTML.
+
+Alternatively, use [GitHub & BitBucket HTML Preview](https://htmlpreview.github.io/) to render it directly.  
+
+The [renv.lock](/renv.lock) file is the lockfile describing the state of the R project's library. It is associated to the [activation script](/renv/activate.R) and the R project's library. All these files have been created using the package [renv](https://rstudio.github.io/renv/index.html).
+
+See the section [Contributions](#contributions) for details on the [CONDUCT.md](/CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) files.
+
+
+# How to run in your browser or download and run locally
+This research compendium has been developed using the statistical programming languages R. To work with the compendium, you will need to install on your computer the [R software](https://cloud.r-project.org/) and [RStudio Desktop](https://rstudio.com/products/rstudio/download/).
+
+To work locally with the R analysis, either from the ZIP archive or from cloning the GitHub repository to your computer:
+
+- open the [`r repo`.Rproj](/`r repo`.Rproj) file in RStudio; this takes some time the first time.  
+- run `renv::status()` and then `renv::restore()` to restore the state of your project from [renv.lock](/renv.lock). 
+
+Using the package `renv` implies that installing, removing and updating packages is done within the project. In other words, all the packages that you install/update while in a project using `renv` will not be available in any other project. If you want to globally install/remove/update packages, make sure you close the project first.
+
+You can also download the compendium as [a ZIP archive](https://github.com/ivan-paleo/`r repo`/archive/main.zip).  
+Alternatively, if you use GitHub, you can [fork and clone](https://happygitwithr.com/fork-and-clone.html) the repository to your account. See also the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
+
+# License
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+See also [License file](LICENSE) in the repository.
+
+Author: Ivan Calandra
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+
+
+# Contributions
+We welcome contributions from everyone. Before you get started, please see our [contributor guidelines](CONTRIBUTING.md). Please note that this project is released with a [Contributor Code of Conduct](CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+
+# References
+Soler S. 2022.cc-licenses: Creative Commons Licenses for GitHub Projects. Available at https://github.com/santisoler/cc-licenses (accessed September 27, 2022)

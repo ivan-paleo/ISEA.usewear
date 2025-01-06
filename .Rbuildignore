@@ -1,0 +1,10 @@
+^renv$
+^renv\.lock$
+^ISEA\.usewear\.Rproj$
+^\.Rproj\.user$
+^README\.qmd$
+^README-.*\.png$
+^CONDUCT\.md$
+^CONTRIBUTING\.md$
+^\.binder/Dockerfile$
+^\.binder$
