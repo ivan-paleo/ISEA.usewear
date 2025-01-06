@@ -1,8 +1,14 @@
 ---
-output: github_document
+title: "ISEA use-wear"
+author: "Ivan Calandra"
+date: now
+date-format: ", YYYY-MM-DD, HH:mm:ss"
+format: 
+  gfm: default
+toc: true
+toc-depth: 2
 ---
 
-<!-- README.md is generated from README.qmd. Please edit that file -->
 
 ```{r, echo = FALSE}
 # Please put your information here to include it in the file below.
