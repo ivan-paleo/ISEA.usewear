@@ -1,6 +1,6 @@
 # ISEA use-wear
 Ivan Calandra
-, 2025-01-06, 16:59:55
+, 2025-01-06, 17:07:22
 
 - [How to cite](#how-to-cite)
 - [Contents](#contents)
@@ -10,7 +10,8 @@ Ivan Calandra
 - [Contributions](#contributions)
 - [References](#references)
 
-*The releases are available and citable on Zenodo*
+*The releases are available and citable on Zenodo*  
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14605779.svg)](https://doi.org/10.5281/zenodo.14605779)
 
 This repository contains the data and code for our paper:
 

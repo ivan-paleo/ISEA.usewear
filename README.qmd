@@ -18,7 +18,7 @@ repo <- basename(getwd())
 ```
 
 *The releases are available and citable on Zenodo*  
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14605779.svg)](https://doi.org/10.5281/zenodo.14605779)
 
 This repository contains the data and code for our paper:
 
