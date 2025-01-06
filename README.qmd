@@ -7,7 +7,6 @@ format:
   gfm: default
 toc: true
 toc-depth: 2
-number-sections: true
 ---
 
 

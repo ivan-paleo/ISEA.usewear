@@ -1,17 +1,15 @@
 # ISEA use-wear
 Ivan Calandra
-, 2025-01-06, 16:45:17
+, 2025-01-06, 16:49:28
 
-- [<span class="toc-section-number">1</span> ISEA.usewear](#iseausewear)
-- [<span class="toc-section-number">2</span> How to cite](#how-to-cite)
-- [<span class="toc-section-number">3</span> Contents](#contents)
-- [<span class="toc-section-number">4</span> How to run in your browser
-  or download and run
+- [ISEA.usewear](#iseausewear)
+- [How to cite](#how-to-cite)
+- [Contents](#contents)
+- [How to run in your browser or download and run
   locally](#how-to-run-in-your-browser-or-download-and-run-locally)
-- [<span class="toc-section-number">5</span> License](#license)
-- [<span class="toc-section-number">6</span>
-  Contributions](#contributions)
-- [<span class="toc-section-number">7</span> References](#references)
+- [License](#license)
+- [Contributions](#contributions)
+- [References](#references)
 
 *The releases are available and citable on Zenodo*
 
